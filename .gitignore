@@ -9,4 +9,6 @@ oracleJdk-26/
 Flutter-Demo/.dart_tool/
 Flutter-Demo/build/
 Mobile/.dart_tool/
-Mobile/build/
+Mobile/build/
+
+.env
