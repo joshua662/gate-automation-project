@@ -31,11 +31,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   String? _selectedAvatarPath;
   bool _isUploadingAvatar = false;
 
-  // Edit modal animation
-  late final AnimationController _editModalCtrl;
-  late final Animation<double> _editModalFade;
-  late final Animation<Offset> _editModalSlide;
-
   // Edit form controllers
   final _editFormKey = GlobalKey<FormState>();
   final _firstNameCtrl = TextEditingController();
@@ -45,27 +40,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   final _modelCtrl = TextEditingController();
   final _colorCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   bool _isSubmittingEdit = false;
+
+  late AnimationController _editModalCtrl;
+  late Animation<double> _editModalFade;
+  late Animation<Offset> _editModalSlide;
+  late Animation<double> _cardScale;
+  late Animation<double> _cardFade;
 
   @override
   void initState() {
     super.initState();
     _editModalCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 380),
-      reverseDuration: const Duration(milliseconds: 260),
+      duration: const Duration(milliseconds: 400),
+      reverseDuration: const Duration(milliseconds: 300),
     );
 
-    // Backdrop fades in quickly (first 50% of animation)
-    _editModalFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _editModalCtrl,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-        reverseCurve: const Interval(0.3, 1.0, curve: Curves.easeIn),
-      ),
-    );
+    _editModalFade = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+      parent: _editModalCtrl,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeIn),
+    ));
 
-    // Card slides up with a spring overshoot (starts slightly after backdrop)
     _editModalSlide = Tween<Offset>(
       begin: const Offset(0, 0.18),
       end: Offset.zero,
@@ -74,6 +73,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       curve: const Interval(0.1, 1.0, curve: Cubic(0.34, 1.56, 0.64, 1)),
       reverseCurve: const Interval(0.0, 0.9, curve: Curves.easeInCubic),
     ));
+
+    _cardScale = Tween<double>(begin: 0.88, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _editModalCtrl,
+        curve: const Interval(0.1, 1.0, curve: Cubic(0.34, 1.56, 0.64, 1)),
+        reverseCurve: const Interval(0.0, 0.9, curve: Curves.easeIn),
+      ),
+    );
+
+    _cardFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _editModalCtrl,
+        curve: const Interval(0.1, 0.7, curve: Curves.easeOut),
+        reverseCurve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+      ),
+    );
   }
 
   @override
@@ -98,6 +113,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     _modelCtrl.dispose();
     _colorCtrl.dispose();
     _addressCtrl.dispose();
+    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     super.dispose();
   }
 
@@ -114,6 +131,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     _modelCtrl.text = user.carModel ?? '';
     _colorCtrl.text = user.carColor ?? '';
     _addressCtrl.text = user.address ?? '';
+    _emailCtrl.text = user.email;
+    _usernameCtrl.text = user.username ?? user.slug ?? '';
     setState(() => _showEditModal = true);
     _editModalCtrl.forward(from: 0);
   }
@@ -150,6 +169,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       final model = _modelCtrl.text.trim();
       final color = _colorCtrl.text.trim();
       final addr = _addressCtrl.text.trim();
+      final email = _emailCtrl.text.trim();
+      final username = _usernameCtrl.text.trim();
 
       await service.submitUpdateRequest({
         'request_type': 'profile_update',
@@ -160,6 +181,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         if (model.isNotEmpty) 'car_model': model,
         if (color.isNotEmpty) 'car_color': color,
         if (addr.isNotEmpty) 'address': addr,
+        if (email.isNotEmpty) 'email': email,
+        if (username.isNotEmpty) 'username': username,
       });
 
       // Optimistically update local Auth state so profile screen reflects changes live
@@ -175,6 +198,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           carModel: model.isNotEmpty ? model : currentUser.carModel,
           carColor: color.isNotEmpty ? color : currentUser.carColor,
           address: addr.isNotEmpty ? addr : currentUser.address,
+          email: email.isNotEmpty ? email : currentUser.email,
+          username: username.isNotEmpty ? username : currentUser.username,
         );
         ref.read(authProvider.notifier).setUser(updatedUser);
       }
@@ -892,24 +917,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   // ── Edit Profile Modal ───────────────────────────────────────────────────
   Widget _buildEditModal() {
-    // Card scale: springs from 0.88 → 1.0 with springy overshoot
-    final cardScale = Tween<double>(begin: 0.88, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _editModalCtrl,
-        curve: const Interval(0.1, 1.0, curve: Cubic(0.34, 1.56, 0.64, 1)),
-        reverseCurve: const Interval(0.0, 0.9, curve: Curves.easeIn),
-      ),
-    );
-
-    // Card fade: starts slightly after backdrop
-    final cardFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _editModalCtrl,
-        curve: const Interval(0.1, 0.7, curve: Curves.easeOut),
-        reverseCurve: const Interval(0.0, 0.6, curve: Curves.easeIn),
-      ),
-    );
-
     return Positioned.fill(
       child: Stack(
         children: [
@@ -933,9 +940,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               child: SlideTransition(
                 position: _editModalSlide,
                 child: FadeTransition(
-                  opacity: cardFade,
+                  opacity: _cardFade,
                   child: ScaleTransition(
-                    scale: cardScale,
+                    scale: _cardScale,
                     alignment: Alignment.bottomCenter,
                     child: SingleChildScrollView(
                       padding: EdgeInsets.all(18.r),
@@ -1063,6 +1070,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
                                 _ModalField(label: 'Address', controller: _addressCtrl),
                                 SizedBox(height: 16.h),
+
+                                // ── Account Information ──
+                                Text(
+                                  'Account Information',
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 12.h),
+
+                                _ModalField(
+                                  label: 'Email Address',
+                                  controller: _emailCtrl,
+                                  isRequired: true,
+                                ),
+                                SizedBox(height: 12.h),
+                                _ModalField(
+                                  label: 'Username',
+                                  controller: _usernameCtrl,
+                                  isRequired: true,
+                                ),
+                                SizedBox(height: 20.h),
 
                                 // Notice box
                                 Container(

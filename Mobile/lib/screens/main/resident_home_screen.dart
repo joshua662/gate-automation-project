@@ -216,12 +216,23 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                       flexibleSpace: FlexibleSpaceBar(
                         background: Container(
                           decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Color(0xFF0A0E27), Color(0xFF1D4ED8)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                            image: DecorationImage(
+                              image: AssetImage('assets/images/subdivision-gate-background.png'),
+                              fit: BoxFit.cover,
                             ),
                           ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.black.withAlpha(190),
+                                  Colors.black.withAlpha(90),
+                                  Colors.black.withAlpha(210),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
                           child: SafeArea(
                             child: Padding(
                               padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
@@ -229,57 +240,21 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  // ── Top Row: Welcome + Clock Badge ─────────
                                   Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
+                                      // Left: Welcome back text
                                       Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Welcome back,',
-                                              style: TextStyle(
-                                                fontSize: 13.sp,
-                                                color: Colors.white60,
-                                              ),
-                                            ),
-                                            SizedBox(height: 2.h),
-                                            Text(
-                                              user?.name ?? 'Resident',
-                                              style: TextStyle(
-                                                fontSize: 22.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: 4.h),
-                                            if (user?.plateNumber != null)
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 10.w,
-                                                  vertical: 3.h,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white.withAlpha(40),
-                                                  borderRadius: BorderRadius.circular(20),
-                                                  border: Border.all(
-                                                    color: Colors.white.withAlpha(60),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  'Plate: ${user!.plateNumber!}',
-                                                  style: TextStyle(
-                                                    fontSize: 11.sp,
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
+                                        child: Text(
+                                          'Welcome back,',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.white60,
+                                          ),
                                         ),
                                       ),
-                                      SizedBox(width: 12.w),
-                                      // Live Clock Badge placed in top-right header position
+                                      // Right: Clock Badge
                                       Container(
                                         padding: EdgeInsets.symmetric(
                                           horizontal: 12.w,
@@ -322,9 +297,45 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                       ),
                                     ],
                                   ),
+                                  SizedBox(height: 4.h),
+                                  // ── User Name ──────────────────────────────
+                                  Text(
+                                    user?.name ?? 'Resident',
+                                    style: TextStyle(
+                                      fontSize: 26.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  // ── Plate Badge ────────────────────────────
+                                  if (user?.plateNumber != null)
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 10.w,
+                                        vertical: 4.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(40),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Colors.white.withAlpha(60),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Plate: ${user!.plateNumber!}',
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
+                          ),
                           ),
                         ),
                       ),
@@ -566,35 +577,119 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // ── Subtitle + Mark All Read Row ──────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Gate security alerts & messages',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: const Color(0xFFA1A1AA),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(6.r),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF3B82F6).withAlpha(25),
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                child: Icon(
+                                  Icons.notifications_active_rounded,
+                                  color: const Color(0xFF3B82F6),
+                                  size: 14.r,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Security alerts & messages',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: const Color(0xFF8B949E),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (notifs.isNotEmpty)
+                            GestureDetector(
+                              onTap: () async {
+                                await ref
+                                    .read(residentServiceProvider)
+                                    .markAllNotificationsRead();
+                                ref.invalidate(notificationsProvider);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w,
+                                  vertical: 5.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF3B82F6).withAlpha(20),
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(
+                                    color: const Color(0xFF3B82F6).withAlpha(50),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Mark all read',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    color: const Color(0xFF60A5FA),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              await ref
-                                  .read(residentServiceProvider)
-                                  .markAllNotificationsRead();
-                              ref.invalidate(notificationsProvider);
-                            },
-                            child: const Text('Mark all read'),
-                          ),
                         ],
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 14.h),
+                      // ── Notification List or Empty State ──────────
                       ConstrainedBox(
                         constraints: BoxConstraints(maxHeight: 400.h),
                         child: notifs.isEmpty
-                            ? Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(24.r),
-                                  child: const Text('No notifications.'),
+                            ? Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 40.h,
+                                  horizontal: 20.w,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF13171F),
+                                  borderRadius: BorderRadius.circular(14.r),
+                                  border: Border.all(
+                                    color: Colors.white.withAlpha(15),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(14.r),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(8),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.notifications_off_rounded,
+                                        color: const Color(0xFF6E7681),
+                                        size: 28.r,
+                                      ),
+                                    ),
+                                    SizedBox(height: 12.h),
+                                    Text(
+                                      "You're all caught up!",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      'No new notifications at this time.',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: const Color(0xFF8B949E),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               )
                             : ListView.builder(
@@ -604,30 +699,92 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                   final item = notifs[i];
                                   return Container(
                                     margin: EdgeInsets.only(bottom: 8.h),
-                                    padding: EdgeInsets.all(12.r),
+                                    padding: EdgeInsets.all(14.r),
                                     decoration: BoxDecoration(
                                       color: item.isRead
-                                          ? const Color(0x1F27272A)
-                                          : const Color(0x333B82F6),
-                                      borderRadius: BorderRadius.circular(10.r),
+                                          ? const Color(0xFF13171F)
+                                          : const Color(0xFF171D29),
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      border: Border.all(
+                                        color: item.isRead
+                                            ? Colors.white.withAlpha(15)
+                                            : const Color(0xFF3B82F6).withAlpha(60),
+                                      ),
                                     ),
-                                    child: ListTile(
-                                      contentPadding: EdgeInsets.zero,
-                                      title: Text(
-                                        item.title,
-                                        style: TextStyle(
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 34.r,
+                                          height: 34.r,
+                                          decoration: BoxDecoration(
+                                            color: item.isRead
+                                                ? Colors.white.withAlpha(12)
+                                                : const Color(0xFF3B82F6).withAlpha(25),
+                                            borderRadius: BorderRadius.circular(10.r),
+                                          ),
+                                          child: Icon(
+                                            Icons.notifications_rounded,
+                                            color: item.isRead
+                                                ? const Color(0xFF8B949E)
+                                                : const Color(0xFF3B82F6),
+                                            size: 16.r,
+                                          ),
                                         ),
-                                      ),
-                                      subtitle: Text(
-                                        item.message,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: const Color(0xFFA1A1AA),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      item.title,
+                                                      style: TextStyle(
+                                                        fontSize: 13.sp,
+                                                        fontWeight: item.isRead
+                                                            ? FontWeight.w500
+                                                            : FontWeight.w600,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (!item.isRead)
+                                                    Container(
+                                                      width: 7.r,
+                                                      height: 7.r,
+                                                      margin: EdgeInsets.only(left: 8.w),
+                                                      decoration: const BoxDecoration(
+                                                        color: Color(0xFF3B82F6),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                item.message,
+                                                style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  color: const Color(0xFF8B949E),
+                                                  height: 1.35,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              SizedBox(height: 6.h),
+                                              Text(
+                                                item.createdAt,
+                                                style: TextStyle(
+                                                  fontSize: 10.5.sp,
+                                                  color: const Color(0xFF6E7681),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   );
                                 },

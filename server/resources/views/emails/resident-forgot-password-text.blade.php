@@ -5,7 +5,6 @@ We received a request to reset the password for your Gate Access System account 
 For your security, a new password has been automatically generated for you. Please use the credentials below to log back into your portal.
 
 Your new portal login credentials:
-Username: {{ $username }}
 New Password: {{ $password }}
 
 Gate Access Portal:
