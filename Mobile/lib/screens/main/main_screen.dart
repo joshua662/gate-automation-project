@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/resident_provider.dart';
 import '../../widgets/custom_floating_nav_bar.dart';
 import 'profile_screen.dart';
 import 'resident_home_screen.dart';
@@ -22,21 +23,27 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final notifsAsync = ref.watch(notificationsProvider);
+    final hasUnreadNotifs = notifsAsync.maybeWhen(
+      data: (list) => list.any((n) => !n.isRead),
+      orElse: () => false,
+    );
+
     final tabs = [
       ResidentHomeScreen(onNavigateTab: _onNavigateTab),
       const ResidentNotificationsScreen(),
-      const ProfileScreen(),
+      ProfileScreen(isActive: _currentIndex == 2),
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: const Color(0xFF0A0D14),
       extendBody: true,
       body: IndexedStack(index: _currentIndex, children: tabs),
       bottomNavigationBar: CustomFloatingBottomNavBar(
         selectedIndex: _currentIndex,
         onItemSelected: (i) => setState(() => _currentIndex = i),
-        items: const [
-          NavItemData(
+        items: [
+          const NavItemData(
             icon: Icons.home_outlined,
             selectedIcon: Icons.home_rounded,
             label: 'Home',
@@ -45,8 +52,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icons.notifications_outlined,
             selectedIcon: Icons.notifications_rounded,
             label: 'Alerts',
+            hasBadge: hasUnreadNotifs,
           ),
-          NavItemData(
+          const NavItemData(
             icon: Icons.person_outline,
             selectedIcon: Icons.person_rounded,
             label: 'Profile',
@@ -56,3 +64,4 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 }
+
