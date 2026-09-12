@@ -4,6 +4,7 @@ import type { GateLog, NotificationItem, UpdateRequestItem } from "../../interfa
 import { useAuth } from "../../contexts/AuthContext";
 import Spinner from "../../components/Spinner/Spinner";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
+import { formatPlateInput } from "../../utils/plateOcr";
 
 type ResidentModal = "notifications" | "logs" | "guest" | null;
 
@@ -366,7 +367,7 @@ const ResidentHomePage = () => {
 
                     <SectionHeading title="Guest Vehicle Information" />
                     <div className="grid gap-5 md:grid-cols-3">
-                        <Field label="Vehicle Plate Number" name="guest_plate_number" value={guestForm.guest_plate_number} onChange={(value) => setGuestForm({ ...guestForm, guest_plate_number: value.toUpperCase() })} required placeholder="ABC-1234" mono />
+                        <Field label="Vehicle Plate Number" name="guest_plate_number" value={guestForm.guest_plate_number} onChange={(value) => setGuestForm({ ...guestForm, guest_plate_number: formatPlateInput(value) })} required placeholder="e.g. ABC 1234" mono />
                         <Field label="Car Model" name="guest_car_model" value={guestForm.guest_car_model} onChange={(value) => setGuestForm({ ...guestForm, guest_car_model: value })} required placeholder="Honda Civic 2020" />
                         <Field label="Car Color" name="guest_car_color" value={guestForm.guest_car_color} onChange={(value) => setGuestForm({ ...guestForm, guest_car_color: value })} placeholder="White" />
                     </div>

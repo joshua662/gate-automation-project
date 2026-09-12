@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { adminAuthApi } from '../../services/adminApi'
 import { guardApi, type GuardUser } from '../../services/guardApi'
+import { formatPlateInput } from '../../utils/plateFormat'
 import { formatDateShort } from '../../utils/formatDate'
 import { useModalAnimation } from '../../hooks/useModalAnimation'
 import GuardActivityLogs from './GuardActivityLogs'
@@ -493,9 +494,10 @@ const GuardDetailsModal = ({ isOpen, user, onClose, onUpdate }: GuardDetailsProp
                     <input
                       type="text"
                       required
+                      placeholder="e.g. ABC 1234"
                       value={form.plate_number}
-                      onChange={(e) => setForm({ ...form, plate_number: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#121212] px-3.5 py-2 text-sm text-zinc-100 outline-none focus:border-[#C5A073]"
+                      onChange={(e) => setForm({ ...form, plate_number: formatPlateInput(e.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-[#121212] px-3.5 py-2 text-sm text-zinc-100 outline-none focus:border-[#C5A073] placeholder:text-zinc-600"
                     />
                   </div>
                   <div>

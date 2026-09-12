@@ -4,6 +4,7 @@ import GenderService from "../../services/GenderService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
 import loginBackdrop from "../../assets/img/subdivision-gate-background.png";
+import { formatPlateInput } from "../../utils/plateOcr";
 
 const resolveProfilePictureUrl = (path?: string | null): string | null => {
     if (!path) return null;
@@ -391,7 +392,7 @@ const ResidentProfilePage = () => {
                                     <Field label="Birth Date" name="birth_date" type="date" value={form.birth_date} onChange={(value) => setForm({ ...form, birth_date: value })} required />
                                     <Field label="Email" name="email" type="email" value={form.email} disabled onChange={() => undefined} />
                                     <Field label="Contact Number" name="contact_number" value={form.contact_number} onChange={(value) => setForm({ ...form, contact_number: value.replace(/\D/g, "").slice(0, 11) })} required maxLength={11} inputMode="numeric" pattern="[0-9]*" />
-                                    <Field label="Plate Number" name="plate_number" value={form.plate_number} onChange={(value) => setForm({ ...form, plate_number: value.toUpperCase() })} required mono />
+                                    <Field label="Plate Number" name="plate_number" value={form.plate_number} onChange={(value) => setForm({ ...form, plate_number: formatPlateInput(value) })} required placeholder="e.g. ABC 1234" mono />
                                     <Field label="Car Model" name="car_model" value={form.car_model} onChange={(value) => setForm({ ...form, car_model: value })} required />
                                     <Field label="Car Color" name="car_color" value={form.car_color} onChange={(value) => setForm({ ...form, car_color: value })} required />
                                 </div>
@@ -466,6 +467,7 @@ const Field = ({
     maxLength?: number;
     inputMode?: "search" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "none";
     pattern?: string;
+    placeholder?: string;
 }) => (
     <label className="block">
         <span className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}{required ? " *" : ""}</span>
@@ -476,6 +478,7 @@ const Field = ({
                 onChange={(event) => onChange(event.target.value)}
                 rows={3}
                 required={required}
+                placeholder={placeholder}
                 className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
             />
         ) : (
@@ -489,6 +492,7 @@ const Field = ({
                 maxLength={maxLength}
                 inputMode={inputMode}
                 pattern={pattern}
+                placeholder={placeholder}
                 className={`w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:disabled:bg-zinc-900 ${mono ? "font-mono uppercase" : ""}`}
             />
         )}

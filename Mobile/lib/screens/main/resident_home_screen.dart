@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_strings.dart';
+import '../../core/utils/plate_input_formatter.dart';
 import '../../core/utils/toast_helper.dart';
 import '../../models/gate_log_model.dart';
 import '../../providers/auth_provider.dart';
@@ -1018,8 +1020,9 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                 child: _DarkModalInput(
                                   label: 'Plate Number *',
                                   controller: _guestPlateCtrl,
-                                  hint: 'ABC 1234',
+                                  hint: 'e.g. ABC 1234',
                                   required: true,
+                                  inputFormatters: [PlateInputFormatter()],
                                 ),
                               ),
                               SizedBox(width: 8.w),

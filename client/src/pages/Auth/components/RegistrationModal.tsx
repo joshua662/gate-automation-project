@@ -7,6 +7,7 @@ import type { AdmissionRegistrationForm } from "./authTypes";
 import puebloDePanayLogo from "../../../assets/img/pdp-logo-invert.png";
 import loginBackdrop from "../../../assets/img/subdivision-gate-background.png";
 import { CustomDatePicker } from "./CustomDatePicker";
+import { formatPlateInput } from "../../../utils/plateOcr";
 
 type TrailingIconName = "user" | "calendar" | "email" | "phone" | "lock" | "plate";
 
@@ -578,9 +579,9 @@ const RegistrationModal = ({
                                             <UnderlineField
                                                 label="Plate Number"
                                                 name="adm_plate"
-                                                placeholder="e.g. ABC1234"
+                                                placeholder="e.g. ABC 1234"
                                                 value={form.plate_number}
-                                                onChange={(e) => setForm({ ...form, plate_number: e.target.value.toUpperCase() })}
+                                                onChange={(e) => setForm({ ...form, plate_number: formatPlateInput(e.target.value) })}
                                                 required={form.role === "Resident"}
                                                 error={err("plate_number")}
                                                 trailingIcon="plate"

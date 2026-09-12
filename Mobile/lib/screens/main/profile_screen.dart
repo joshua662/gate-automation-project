@@ -5,10 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../core/constants/api_constants.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/router/app_router.dart';
 import '../../core/utils/image_helper.dart';
+import '../../core/utils/plate_input_formatter.dart';
 import '../../core/utils/toast_helper.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
@@ -1066,8 +1068,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                     Expanded(
                                       child: _ModalField(
                                         label: 'Plate Number',
+                                        hint: 'e.g. ABC 1234',
                                         controller: _plateCtrl,
                                         isRequired: true,
+                                        inputFormatters: [PlateInputFormatter()],
                                       ),
                                     ),
                                     SizedBox(width: 10.w),
@@ -1396,6 +1400,7 @@ class _ModalField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
+  final String? hint;
 
   const _ModalField({
     required this.label,
@@ -1405,6 +1410,7 @@ class _ModalField extends StatelessWidget {
     this.inputFormatters,
     this.keyboardType,
     this.validator,
+    this.hint,
   });
 
   @override
@@ -1436,6 +1442,11 @@ class _ModalField extends StatelessWidget {
               : null),
           style: TextStyle(fontSize: 13.sp, color: Colors.white),
           decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: const Color(0x4DFFFFFF),
+              fontSize: 13.sp,
+            ),
             filled: true,
             fillColor: const Color(0xFF0D1117),
             contentPadding: EdgeInsets.symmetric(
