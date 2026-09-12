@@ -488,7 +488,10 @@ const AdminProfileModal = ({ isOpen, onClose, user, onLogout }: AdminProfileModa
                           type="text"
                           placeholder="e.g. 09123456789"
                           value={editForm.contact_number}
-                          onChange={(e) => setEditForm({ ...editForm, contact_number: e.target.value })}
+                          onChange={(e) => setEditForm({ ...editForm, contact_number: e.target.value.replace(/\D/g, "").slice(0, 11) })}
+                          maxLength={11}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           className={inputClass}
                         />
                       </div>

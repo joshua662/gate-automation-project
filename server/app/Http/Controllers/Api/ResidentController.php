@@ -189,7 +189,7 @@ class ResidentController extends Controller
             'password' => $ignoreUserId === null
                 ? ['required', 'string', 'min:6', 'max:50', 'confirmed']
                 : ['sometimes', 'nullable', 'string', 'min:6', 'max:50', 'confirmed'],
-            'contact_number' => ['required', 'max:20'],
+            'contact_number' => ['required', 'string', 'regex:/^[0-9]{11}$/'],
             'address' => ['required', 'max:255'],
             'plate_number' => ['required', 'max:20', Rule::unique('tbl_users', 'plate_number')->ignore($ignoreUserId, 'user_id')],
             'car_model' => ['required', 'max:55'],

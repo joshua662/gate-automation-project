@@ -23,6 +23,10 @@ const ResidentRegisterPage = () => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        if (form.contact_number.length !== 11) {
+            setError("Contact number must be exactly 11 digits.");
+            return;
+        }
         setLoading(true);
         setError("");
         try {
@@ -49,7 +53,7 @@ const ResidentRegisterPage = () => {
                         {genders.map((g) => <option key={g.gender_id} value={g.gender_id}>{g.gender}</option>)}
                     </FloatingLabelSelect>
                     <FloatingLabelInput label="Birthdate" name="birth_date" type="date" value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} required />
-                    <FloatingLabelInput type="text" label="Contact Number" name="contact_number" value={form.contact_number} onChange={(e) => setForm({ ...form, contact_number: e.target.value })} required />
+                    <FloatingLabelInput type="text" label="Contact Number" name="contact_number" value={form.contact_number} onChange={(e) => setForm({ ...form, contact_number: e.target.value.replace(/\D/g, "").slice(0, 11) })} required maxLength={11} inputMode="numeric" pattern="[0-9]*" />
                     <FloatingLabelInput type="text" label="Address" name="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
                     <FloatingLabelInput type="text" label="Plate Number" name="plate_number" value={form.plate_number} onChange={(e) => setForm({ ...form, plate_number: e.target.value })} required />
                     <FloatingLabelInput type="text" label="Car Model" name="car_model" value={form.car_model} onChange={(e) => setForm({ ...form, car_model: e.target.value })} required />

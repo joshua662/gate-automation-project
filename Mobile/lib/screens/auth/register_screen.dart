@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -452,10 +453,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             controller: _contactCtrl,
                             keyboardType: TextInputType.phone,
                             required: true,
+                            maxLength: 11,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(11),
+                            ],
                             trailingIcon: Icons.phone_outlined,
                             errorText: _fieldErrors['contact_number'],
-                            validator: (v) =>
-                                v == null || v.trim().isEmpty ? 'Contact number is required for residents' : null,
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Contact number is required for residents';
+                              }
+                              if (v.trim().length != 11) {
+                                return 'Contact number must be exactly 11 digits';
+                              }
+                              return null;
+                            },
                           ),
                           UnderlineInputField(
                             label: 'Plate Number',

@@ -540,7 +540,7 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user, on
                         </>
                       )}
                       <EditField label="Contact Number" error={fieldError("contact_number")}>
-                        <input className={inputClass} value={editForm.contact_number} onChange={(e) => setEditForm({ ...editForm, contact_number: e.target.value })} />
+                        <input className={inputClass} value={editForm.contact_number} onChange={(e) => setEditForm({ ...editForm, contact_number: e.target.value.replace(/\D/g, "").slice(0, 11) })} maxLength={11} inputMode="numeric" pattern="[0-9]*" />
                       </EditField>
                       {isResident && (
                         <div className="col-span-1 sm:col-span-2">

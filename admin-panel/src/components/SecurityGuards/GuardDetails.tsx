@@ -428,7 +428,10 @@ const GuardDetailsModal = ({ isOpen, user, onClose, onUpdate }: GuardDetailsProp
                     type="text"
                     required={isResident}
                     value={form.contact_number}
-                    onChange={(e) => setForm({ ...form, contact_number: e.target.value })}
+                    onChange={(e) => setForm({ ...form, contact_number: e.target.value.replace(/\D/g, "").slice(0, 11) })}
+                    maxLength={11}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     className="mt-1 w-full rounded-lg border border-white/10 bg-[#121212] px-3.5 py-2 text-sm text-zinc-100 outline-none focus:border-[#C5A073]"
                   />
                 </div>

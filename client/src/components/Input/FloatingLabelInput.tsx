@@ -15,6 +15,9 @@ interface FloatingLabelInputProps {
   disabled?: boolean;
   readOnly?: boolean;
   errors?: string[];
+  maxLength?: number;
+  inputMode?: "search" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "none";
+  pattern?: string;
 }
 
 const FloatingLabelInput: FC<FloatingLabelInputProps> = ({
@@ -32,6 +35,9 @@ const FloatingLabelInput: FC<FloatingLabelInputProps> = ({
   disabled,
   readOnly,
   errors,
+  maxLength,
+  inputMode,
+  pattern,
 }) => {
   const hasError = Boolean(errors && errors.length > 0);
 
@@ -45,6 +51,9 @@ const FloatingLabelInput: FC<FloatingLabelInputProps> = ({
           value={value}
           onChange={onChange}
           aria-invalid={hasError}
+          maxLength={maxLength}
+          inputMode={inputMode}
+          pattern={pattern}
           className={`${newInputClassName
             ? newInputClassName
             : `peer block w-full appearance-none rounded-lg border bg-transparent px-2.5 pb-2.5 pt-4 text-sm text-gray-900 focus:outline-none focus:ring-0 

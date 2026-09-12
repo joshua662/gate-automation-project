@@ -103,7 +103,7 @@ class UserController extends Controller
             'gender' => ['required'],
             'birth_date' => ['required', 'date'],
             'email' => ['nullable', 'email', 'max:255'],
-            'contact_number' => ['nullable', 'max:20'],
+            'contact_number' => ['nullable', 'string', 'regex:/^[0-9]{11}$/'],
             'username' => ['required', 'min:6', 'max:50', Rule::unique('tbl_users', 'username')->ignore($user->user_id, 'user_id')]
         ]);
 

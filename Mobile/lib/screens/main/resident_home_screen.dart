@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -991,6 +992,21 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                             controller: _guestContactCtrl,
                             hint: '09123456789',
                             required: true,
+                            maxLength: 11,
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(11),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (v.trim().length != 11) {
+                                return 'Contact number must be 11 digits';
+                              }
+                              return null;
+                            },
                           ),
                           SizedBox(height: 14.h),
 
@@ -1567,12 +1583,20 @@ class _DarkModalInput extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
   final bool required;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
 
   const _DarkModalInput({
     required this.label,
     required this.controller,
     required this.hint,
     this.required = false,
+    this.maxLength,
+    this.inputFormatters,
+    this.keyboardType,
+    this.validator,
   });
 
   @override
@@ -1590,9 +1614,15 @@ class _DarkModalInput extends StatelessWidget {
         SizedBox(height: 4.h),
         TextFormField(
           controller: controller,
-          validator: required
-              ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          maxLength: maxLength,
+          buildCounter: maxLength != null
+              ? (context, {required currentLength, isFocused, maxLength}) => null
               : null,
+          validator: validator ?? (required
+              ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
+              : null),
           style: TextStyle(fontSize: 13.sp, color: Colors.white),
           decoration: InputDecoration(
             hintText: hint,

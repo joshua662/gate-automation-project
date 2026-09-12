@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UnderlineInputField extends StatelessWidget {
@@ -13,6 +14,8 @@ class UnderlineInputField extends StatelessWidget {
   final VoidCallback? onTap;
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
 
   const UnderlineInputField({
     super.key,
@@ -27,6 +30,8 @@ class UnderlineInputField extends StatelessWidget {
     this.onTap,
     this.onChanged,
     this.validator,
+    this.inputFormatters,
+    this.maxLength,
   });
 
   @override
@@ -70,6 +75,11 @@ class UnderlineInputField extends StatelessWidget {
             onTap: onTap,
             onChanged: onChanged,
             validator: validator,
+            inputFormatters: inputFormatters,
+            maxLength: maxLength,
+            buildCounter: maxLength != null
+                ? (context, {required currentLength, isFocused, maxLength}) => null
+                : null,
             style: TextStyle(
               fontSize: 14.5.sp,
               color: Colors.white,

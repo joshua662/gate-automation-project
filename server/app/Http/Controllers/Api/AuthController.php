@@ -286,7 +286,7 @@ class AuthController extends Controller
         } else {
             $validated = $request->validate([
                 'plate_number' => ['required', 'string', 'max:20'],
-                'contact_number' => ['required', 'string', 'max:20'],
+                'contact_number' => ['required', 'string', 'regex:/^[0-9]{11}$/'],
             ]);
 
             $normalizedPlate = strtoupper(preg_replace('/\s+/', '', $validated['plate_number']));
@@ -473,7 +473,7 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'username' => ['sometimes', 'min:6', 'max:50', Rule::unique('tbl_users', 'username')],
             'password' => ['sometimes', 'min:6', 'max:50', 'confirmed'],
-            'contact_number' => ['required', 'max:20'],
+            'contact_number' => ['required', 'string', 'regex:/^[0-9]{11}$/'],
             'address' => ['nullable', 'max:255'],
             'plate_number' => ['required', 'max:20', Rule::unique('tbl_users', 'plate_number')],
             'car_model' => ['nullable', 'max:55'],
@@ -606,7 +606,7 @@ class AuthController extends Controller
                 'last_name' => ['sometimes', 'required', 'max:55'],
                 'email' => ['sometimes', 'required', 'email', 'max:255'],
                 'username' => ['sometimes', 'required', 'min:6', 'max:50', Rule::unique('tbl_users', 'username')->ignore($user->user_id, 'user_id')],
-                'contact_number' => ['nullable', 'max:20'],
+                'contact_number' => ['nullable', 'string', 'regex:/^[0-9]{11}$/'],
                 'address' => ['nullable', 'max:255'],
             ]);
 
@@ -639,7 +639,7 @@ class AuthController extends Controller
             'birth_date' => ['sometimes', 'required', 'date'],
             'email' => ['sometimes', 'required', 'email', 'max:255'],
             'username' => ['sometimes', 'required', 'min:6', 'max:50', Rule::unique('tbl_users', 'username')->ignore($user->user_id, 'user_id')],
-            'contact_number' => ['sometimes', 'required', 'max:20'],
+            'contact_number' => ['sometimes', 'required', 'string', 'regex:/^[0-9]{11}$/'],
             'address' => ['sometimes', 'required', 'max:255'],
             'plate_number' => ['sometimes', 'required', 'max:20', Rule::unique('tbl_users', 'plate_number')->ignore($user->user_id, 'user_id')],
             'car_model' => ['sometimes', 'required', 'max:55'],

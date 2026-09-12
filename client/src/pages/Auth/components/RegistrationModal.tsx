@@ -69,10 +69,13 @@ interface UnderlineFieldProps {
     error?: string;
     trailingIcon?: TrailingIconName;
     leadingSlot?: ReactNode;
+    maxLength?: number;
+    inputMode?: "search" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "none";
+    pattern?: string;
 }
 
 const UnderlineField = ({
-    label, name, type = "text", value, onChange, placeholder, required, error, trailingIcon, leadingSlot,
+    label, name, type = "text", value, onChange, placeholder, required, error, trailingIcon, leadingSlot, maxLength, inputMode, pattern,
 }: UnderlineFieldProps) => {
     const borderTone = error
         ? "border-red-400"
@@ -89,7 +92,8 @@ const UnderlineField = ({
                 )}
                 <input
                     id={name} name={name} type={type} value={value} onChange={onChange}
-                    placeholder={placeholder} required={required}
+                    placeholder={placeholder} required={required} maxLength={maxLength}
+                    inputMode={inputMode} pattern={pattern}
                     className="min-w-0 flex-1 border-0 bg-transparent py-3 text-[14.5px] text-white outline-none placeholder:text-white/30"
                 />
                 <FieldTrailingIcon kind={trailingIcon} />
@@ -563,8 +567,11 @@ const RegistrationModal = ({
                                                 name="adm_contact"
                                                 placeholder="e.g. 09171234567"
                                                 value={form.contact_number}
-                                                onChange={(e) => setForm({ ...form, contact_number: e.target.value })}
+                                                onChange={(e) => setForm({ ...form, contact_number: e.target.value.replace(/\D/g, "").slice(0, 11) })}
                                                 required={form.role === "Resident"}
+                                                maxLength={11}
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
                                                 error={err("contact_number")}
                                                 trailingIcon="phone"
                                             />

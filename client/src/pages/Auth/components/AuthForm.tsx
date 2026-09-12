@@ -152,12 +152,13 @@ const AuthForm = ({
         try {
             const isSecurityGuard = admissionForm.role === "Security Guard";
             if (!isSecurityGuard) {
-                if (!admissionForm.contact_number.trim() || !admissionForm.plate_number.trim()) {
+                const contact = admissionForm.contact_number.trim();
+                if (!contact || !admissionForm.plate_number.trim() || contact.length !== 11) {
                     setFieldErrors({
-                        ...(admissionForm.contact_number.trim() ? {} : { contact_number: ["Contact number is required for residents."] }),
+                        ...(contact ? (contact.length !== 11 ? { contact_number: ["Contact number must be exactly 11 digits."] } : {}) : { contact_number: ["Contact number is required for residents."] }),
                         ...(admissionForm.plate_number.trim() ? {} : { plate_number: ["Plate number is required for residents."] }),
                     });
-                    showToast("Please complete the resident contact and plate number fields.", true);
+                    showToast("Please enter a valid 11-digit resident contact number.", true);
                     setRegisterLoading(false);
                     return;
                 }

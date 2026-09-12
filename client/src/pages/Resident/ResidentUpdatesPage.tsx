@@ -97,7 +97,7 @@ const ResidentUpdatesPage = () => {
                 <div className="grid gap-5 md:grid-cols-2">
                     <Field label="Guest Name" name="guest_name" value={guestForm.guest_name} onChange={(value) => setGuestForm({ ...guestForm, guest_name: value })} required placeholder="Full name of the guest vehicle owner" />
                     <Field label="Guest Age" name="guest_age" type="number" value={guestForm.guest_age} onChange={(value) => setGuestForm({ ...guestForm, guest_age: value })} placeholder="Age (optional)" />
-                    <Field label="Guest Contact Number" name="guest_contact_number" value={guestForm.guest_contact_number} onChange={(value) => setGuestForm({ ...guestForm, guest_contact_number: value })} required placeholder="Mobile number of the guest" />
+                    <Field label="Guest Contact Number" name="guest_contact_number" value={guestForm.guest_contact_number} onChange={(value) => setGuestForm({ ...guestForm, guest_contact_number: value.replace(/\D/g, "").slice(0, 11) })} required maxLength={11} inputMode="numeric" pattern="[0-9]*" placeholder="Mobile number of the guest" />
                     <Field label="Guest Address" name="guest_address" value={guestForm.guest_address} onChange={(value) => setGuestForm({ ...guestForm, guest_address: value })} textarea placeholder="Home address of the guest (optional)" />
                 </div>
 
@@ -202,6 +202,9 @@ const Field = ({
     placeholder?: string;
     textarea?: boolean;
     mono?: boolean;
+    maxLength?: number;
+    inputMode?: "search" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "none";
+    pattern?: string;
 }) => (
     <label className="block">
         <span className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}{required ? " *" : ""}</span>
@@ -223,6 +226,9 @@ const Field = ({
                 onChange={(event) => onChange(event.target.value)}
                 required={required}
                 placeholder={placeholder}
+                maxLength={maxLength}
+                inputMode={inputMode}
+                pattern={pattern}
                 min={type === "number" ? 1 : undefined}
                 max={type === "number" ? 150 : undefined}
                 className={`w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 transition focus:border-transparent focus:ring-2 focus:ring-violet-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 ${mono ? "font-mono uppercase" : ""}`}

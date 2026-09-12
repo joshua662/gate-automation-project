@@ -359,7 +359,7 @@ const ResidentModal = ({
                         <Field label="Birthdate" type="date" value={form.birth_date} onChange={(value) => setForm({ ...form, birth_date: value })} required />
                         <Field label="Email" type="email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} required />
                         <Field label="Portal Username" value={form.username} onChange={(value) => setForm({ ...form, username: value })} required />
-                        <Field label="Contact Number" value={form.contact_number} onChange={(value) => setForm({ ...form, contact_number: value })} required />
+                        <Field label="Contact Number" value={form.contact_number} onChange={(value) => setForm({ ...form, contact_number: value.replace(/\D/g, "").slice(0, 11) })} required maxLength={11} inputMode="numeric" pattern="[0-9]*" />
                         <Field label="Plate Number" value={form.plate_number} onChange={(value) => setForm({ ...form, plate_number: value.toUpperCase() })} required mono />
                         <Field label="Car Model" value={form.car_model} onChange={(value) => setForm({ ...form, car_model: value })} required />
                         <Field label="Car Color" value={form.car_color} onChange={(value) => setForm({ ...form, car_color: value })} required />
@@ -389,13 +389,13 @@ const ResidentModal = ({
     </div>
 );
 
-const Field = ({ label, value, onChange, type = "text", required, textarea, mono }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; textarea?: boolean; mono?: boolean }) => (
+const Field = ({ label, value, onChange, type = "text", required, textarea, mono, maxLength, inputMode, pattern }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; textarea?: boolean; mono?: boolean; maxLength?: number; inputMode?: "search" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "none"; pattern?: string }) => (
     <label className="block">
         <span className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}{required ? " *" : ""}</span>
         {textarea ? (
             <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={3} required={required} className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:ring-2 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100" />
         ) : (
-            <input type={type} value={value} onChange={(event) => onChange(event.target.value)} required={required} className={`w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:ring-2 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 ${mono ? "font-mono uppercase" : ""}`} />
+            <input type={type} value={value} onChange={(event) => onChange(event.target.value)} required={required} maxLength={maxLength} inputMode={inputMode} pattern={pattern} className={`w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:ring-2 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 ${mono ? "font-mono uppercase" : ""}`} />
         )}
     </label>
 );

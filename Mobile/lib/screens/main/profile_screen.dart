@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -1042,6 +1043,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                   label: 'Contact Number',
                                   controller: _contactCtrl,
                                   isRequired: true,
+                                  maxLength: 11,
+                                  keyboardType: TextInputType.phone,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(11),
+                                  ],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'This field is required';
+                                    }
+                                    if (v.trim().length != 11) {
+                                      return 'Contact number must be exactly 11 digits';
+                                    }
+                                    return null;
+                                  },
                                 ),
                                 SizedBox(height: 12.h),
 
@@ -1376,11 +1392,19 @@ class _ModalField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final bool isRequired;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
 
   const _ModalField({
     required this.label,
     required this.controller,
     this.isRequired = false,
+    this.maxLength,
+    this.inputFormatters,
+    this.keyboardType,
+    this.validator,
   });
 
   @override
@@ -1399,11 +1423,17 @@ class _ModalField extends StatelessWidget {
         SizedBox(height: 4.h),
         TextFormField(
           controller: controller,
-          validator: isRequired
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          maxLength: maxLength,
+          buildCounter: maxLength != null
+              ? (context, {required currentLength, isFocused, maxLength}) => null
+              : null,
+          validator: validator ?? (isRequired
               ? (v) => (v == null || v.trim().isEmpty)
                   ? 'This field is required'
                   : null
-              : null,
+              : null),
           style: TextStyle(fontSize: 13.sp, color: Colors.white),
           decoration: InputDecoration(
             filled: true,
