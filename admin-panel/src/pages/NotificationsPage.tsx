@@ -4,6 +4,7 @@ import { adminNotificationsApi, type NotificationEntry } from '../services/admin
 import { formatDate } from '../utils/formatDate'
 import { useModalAnimation } from '../hooks/useModalAnimation'
 import ToastMessage from '../components/ToastMessage/ToastMessage'
+import { MaskedEmail } from '../components/MaskedEmail/MaskedEmail'
 
 interface ConfirmationModalProps {
   isOpen: boolean
@@ -259,7 +260,7 @@ const NotificationsPage = () => {
 
                         <div className="flex items-center gap-3">
                           <span className="text-zinc-500 w-12">Email:</span> 
-                          <span className="font-medium text-zinc-200">{details.email}</span>
+                          <MaskedEmail email={details.email} />
                         </div>
                       </div>
                     </div>
