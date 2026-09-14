@@ -65,16 +65,13 @@ export const HelpIcon = () => (
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const adminNavItems: NavItem[] = [
-    { path: "/dashboard", label: "Dashboard", icon: <HomeIcon /> },
-    { path: "/activity-logs", label: "Activity Logs", icon: <ActivityIcon /> },
-    { path: "/notifications", label: "Notifications", icon: <BellIcon /> },
+    { path: "/dashboard", label: "Dashboard", icon: <></> },
+    { path: "/activity-logs", label: "Activity Logs", icon: <></> },
+    { path: "/notifications", label: "Notifications", icon: <></> },
 ];
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const residentNavItems: NavItem[] = [
     { path: "/resident/home", label: "Dashboard", icon: <HomeIcon /> },
-    { path: "/resident/logs", label: "Gate Logs", icon: <ClipboardIcon /> },
-    { path: "/resident/updates", label: "Guest Access", icon: <DocumentCheckIcon /> },
-    { path: "/resident/notifications", label: "Notifications", icon: <BellIcon /> },
     { path: "/resident/help", label: "Help & Support", icon: <HelpIcon /> },
 ];

@@ -376,7 +376,7 @@ const RequestModal = ({ request, onClose }: { request?: UpdateRequestItem; onClo
 };
 
 const EmptyCard = ({ text }: { text: string }) => (
-    <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">{text}</div>
+    <div className="rounded-xl border border-zinc-200/50 bg-transparent p-8 text-center text-zinc-500 dark:border-white/5 dark:bg-transparent dark:text-zinc-400">{text}</div>
 );
 
 const statusClass = (status: UpdateRequestItem["status"]) => {

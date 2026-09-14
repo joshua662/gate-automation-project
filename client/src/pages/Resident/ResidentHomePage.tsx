@@ -276,7 +276,7 @@ const ResidentHomePage = () => {
                         </button>
                     )}
                 </div>
-                <div className="max-h-[62vh] space-y-3 overflow-y-auto pr-1">
+                <div className="space-y-3 pr-1">
                     {notifications.length > 0 ? notifications.map((notification) => (
                         <NotificationCard key={notification.notification_id} notification={notification} onMarkRead={() => void markRead(notification.notification_id)} />
                     )) : (
@@ -291,10 +291,10 @@ const ResidentHomePage = () => {
                     <StatMini label="Total Exits Today" value={String(countToday(logs, "OUT"))} />
                     <StatMini label="Unauthorized Attempts" value={String(unauthorizedCount)} danger />
                 </div>
-                <div className="max-h-[60vh] overflow-auto rounded-xl border border-zinc-200 dark:border-zinc-700">
+                <div className="overflow-x-auto rounded-xl border border-white/10">
                     {logs.length > 0 ? (
-                        <table className="w-full min-w-[760px] bg-white dark:bg-zinc-800">
-                            <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+                        <table className="w-full min-w-[760px]">
+                            <thead className="border-b border-white/10 bg-white/5">
                                 <tr>
                                     <Head>Date & Time</Head>
                                     <Head>Status</Head>
@@ -303,9 +303,9 @@ const ResidentHomePage = () => {
                                     <Head center>Image</Head>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
+                            <tbody className="divide-y divide-white/5">
                                 {logs.map((log) => (
-                                    <tr key={log.gate_log_id} className="transition hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
+                                    <tr key={log.gate_log_id} className="transition hover:bg-white/5">
                                         <td className="px-6 py-4 text-sm text-zinc-900 dark:text-zinc-100">
                                             <p className="font-medium">{formatDate(log.logged_at)}</p>
                                             <p className="text-xs text-zinc-500 dark:text-zinc-400">{new Date(log.logged_at).toLocaleTimeString()}</p>
@@ -385,7 +385,7 @@ const ResidentHomePage = () => {
 
                 <div className="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-700">
                     <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Your Guest Access Requests</h3>
-                    <div className="mt-4 max-h-[320px] space-y-3 overflow-y-auto pr-1">
+                    <div className="mt-4 space-y-3 pr-1">
                         {requestsLoading ? (
                             <Spinner size="md" />
                         ) : guestRequests.length > 0 ? guestRequests.map((request) => (
@@ -442,7 +442,7 @@ const DashboardModal = ({
                 type="button"
                 aria-label="Close modal"
                 onClick={onClose}
-                className={`fixed inset-0 bg-black/75 backdrop-blur-md ${
+                className={`fixed inset-0 bg-black/90 backdrop-blur-md ${
                     isAnimatingOut ? "animate-modal-backdrop-out" : "animate-modal-backdrop-in"
                 }`}
             />
@@ -462,7 +462,7 @@ const DashboardModal = ({
                         ✕
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto pt-4 pr-1 scrollbar-thin scrollbar-thumb-zinc-700">
+                <div className="flex-1 overflow-y-auto pt-4 pb-6 pr-1 scrollbar-thin scrollbar-thumb-zinc-700">
                     {children}
                 </div>
             </div>
@@ -474,7 +474,7 @@ const NotificationCard = ({ notification, compact, onMarkRead }: { notification:
     const meta = notificationMeta(notification.type);
 
     return (
-        <div className={`rounded-r-lg border-l-4 p-4 ${notification.is_read ? "border-zinc-300 bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900" : "border-blue-500 bg-blue-50 dark:bg-blue-900/20"}`}>
+        <div className={`rounded-r-lg border-l-4 p-4 ${notification.is_read ? "border-zinc-600 bg-white/5" : "border-blue-500 bg-blue-500/10"}`}>
             <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                     <div className="mb-1 flex items-center gap-2">
@@ -690,9 +690,9 @@ const Head = ({ children, center }: { children: string; center?: boolean }) => (
 );
 
 const StatMini = ({ label, value, danger }: { label: string; value: string; danger?: boolean }) => (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900">
-        <p className="mb-1 text-xs font-semibold uppercase text-zinc-600 dark:text-zinc-400">{label}</p>
-        <p className={`text-2xl font-bold ${danger ? "text-red-600 dark:text-red-400" : "text-zinc-900 dark:text-zinc-100"}`}>{value}</p>
+    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+        <p className="mb-1 text-xs font-semibold uppercase text-zinc-400">{label}</p>
+        <p className={`text-2xl font-bold ${danger ? "text-red-400" : "text-zinc-100"}`}>{value}</p>
     </div>
 );
 
@@ -704,7 +704,7 @@ const Mini = ({ label, value, strong, mono }: { label: string; value: string; st
 );
 
 const EmptyCard = ({ text }: { text: string }) => (
-    <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">{text}</div>
+    <div className="rounded-xl border border-zinc-200/50 bg-transparent p-8 text-center text-zinc-500 dark:border-white/5 dark:bg-transparent dark:text-zinc-400">{text}</div>
 );
 
 const notificationMeta = (type: string) => {
