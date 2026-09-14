@@ -28,7 +28,14 @@ const GateAccessService = {
         if (filters.search) params.append("search", filters.search);
         return AxiosInstance.get(`/activity-log/loadActivityLogs?${params}`);
     },
-    myGateLogs: (page: number) => AxiosInstance.get(`/gate-log/my-logs?page=${page}`),
+    myGateLogs: (page: number, filters: { direction?: string; status?: string; search?: string; period?: string } = {}) => {
+        const params = new URLSearchParams({ page: String(page) });
+        if (filters.direction) params.append("direction", filters.direction);
+        if (filters.status) params.append("status", filters.status);
+        if (filters.search) params.append("search", filters.search);
+        if (filters.period) params.append("period", filters.period);
+        return AxiosInstance.get(`/gate-log/my-logs?${params}`);
+    },
     exportCsv: (filters: { direction?: string; status?: string } = {}) => {
         const params = new URLSearchParams();
         if (filters.direction) params.append("direction", filters.direction);

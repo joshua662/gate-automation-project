@@ -73,5 +73,8 @@ export const adminNavItems: NavItem[] = [
 // eslint-disable-next-line react-refresh/only-export-components
 export const residentNavItems: NavItem[] = [
     { path: "/resident/home", label: "Dashboard", icon: <HomeIcon /> },
+    { path: "/resident/logs", label: "Gate Logs", icon: <ClipboardIcon /> },
+    { path: "/resident/updates", label: "Guest Access", icon: <DocumentCheckIcon /> },
+    { path: "/resident/notifications", label: "Notifications", icon: <BellIcon /> },
     { path: "/resident/help", label: "Help & Support", icon: <HelpIcon /> },
 ];

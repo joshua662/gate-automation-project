@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\GateLog;
 use App\Services\GateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GateLogController extends Controller
 {
     public function loadGateLogs(Request $request)
     {
+        $user = $request->user();
         $logs = GateLog::query()
             ->when($request->direction, fn ($q) => $q->where('direction', strtoupper($request->direction)))
             ->when($request->status, fn ($q) => $q->where('status', strtolower($request->status)))
@@ -22,20 +24,29 @@ class GateLogController extends Controller
                         ->orWhere('owner_name', 'like', "%{$search}%");
                 });
             })
-            ->when($request->user(), function ($q) use ($request) {
-                if ($request->user()->isResident()) {
-                    $q->where('user_id', $request->user()->user_id);
+            ->when($user, function ($q) use ($user) {
+                if ($user->isResident()) {
+                    $q->where(function ($inner) use ($user) {
+                        $inner->where('user_id', $user->user_id);
+                        if (! empty($user->plate_number)) {
+                            $normalizedPlate = strtoupper(preg_replace('/\s+/', '', $user->plate_number));
+                            $inner->orWhereRaw('UPPER(REPLACE(plate_number, " ", "")) = ?', [$normalizedPlate]);
+                        }
+                    });
                 }
             })
             ->when($request->period, function ($q) use ($request) {
                 $period = $request->period;
                 $start = match ($period) {
+                    'today' => Carbon::today(),
                     'week' => Carbon::now()->startOfWeek(),
                     'month' => Carbon::now()->startOfMonth(),
                     'year' => Carbon::now()->startOfYear(),
-                    default => Carbon::today(),
+                    default => null,
                 };
-                $q->where('logged_at', '>=', $start);
+                if ($start) {
+                    $q->where('logged_at', '>=', $start);
+                }
             })
             ->orderByDesc('logged_at')
             ->paginate(20);
@@ -48,10 +59,22 @@ class GateLogController extends Controller
     public function exportCsv(Request $request): StreamedResponse
     {
         $filename = 'gate_logs_' . now()->format('Y-m-d_His') . '.csv';
+        $user = $request->user();
 
         $query = GateLog::query()
             ->when($request->direction, fn ($q) => $q->where('direction', strtoupper($request->direction)))
             ->when($request->status, fn ($q) => $q->where('status', strtolower($request->status)))
+            ->when($user, function ($q) use ($user) {
+                if ($user->isResident()) {
+                    $q->where(function ($inner) use ($user) {
+                        $inner->where('user_id', $user->user_id);
+                        if (! empty($user->plate_number)) {
+                            $normalizedPlate = strtoupper(preg_replace('/\s+/', '', $user->plate_number));
+                            $inner->orWhereRaw('UPPER(REPLACE(plate_number, " ", "")) = ?', [$normalizedPlate]);
+                        }
+                    });
+                }
+            })
             ->orderByDesc('logged_at');
 
         return response()->streamDownload(function () use ($query) {
@@ -78,9 +101,21 @@ class GateLogController extends Controller
 
     public function exportPdf(Request $request)
     {
+        $user = $request->user();
         $logs = GateLog::query()
             ->when($request->direction, fn ($q) => $q->where('direction', strtoupper($request->direction)))
             ->when($request->status, fn ($q) => $q->where('status', strtolower($request->status)))
+            ->when($user, function ($q) use ($user) {
+                if ($user->isResident()) {
+                    $q->where(function ($inner) use ($user) {
+                        $inner->where('user_id', $user->user_id);
+                        if (! empty($user->plate_number)) {
+                            $normalizedPlate = strtoupper(preg_replace('/\s+/', '', $user->plate_number));
+                            $inner->orWhereRaw('UPPER(REPLACE(plate_number, " ", "")) = ?', [$normalizedPlate]);
+                        }
+                    });
+                }
+            })
             ->orderByDesc('logged_at')
             ->limit(500)
             ->get();
@@ -93,3 +128,4 @@ class GateLogController extends Controller
         ]);
     }
 }
+

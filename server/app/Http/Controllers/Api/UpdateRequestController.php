@@ -34,7 +34,7 @@ class UpdateRequestController extends Controller
                 'request_type' => ['required', 'in:guest_access'],
                 'guest_name' => ['required', 'max:155'],
                 'guest_age' => ['nullable', 'integer', 'min:1', 'max:150'],
-                'guest_contact_number' => ['nullable', 'string', 'regex:/^[0-9]{11}$/'],
+                'guest_contact_number' => ['nullable', 'string', 'regex:/^[0-9+\s-]{7,20}$/'],
                 'guest_address' => ['nullable', 'max:255'],
                 'guest_plate_number' => ['nullable', 'max:20'],
                 'guest_car_model' => ['nullable', 'max:55'],

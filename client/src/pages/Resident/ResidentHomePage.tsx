@@ -422,17 +422,47 @@ const DashboardModal = ({
     maxWidth?: string;
 }) => {
     const { shouldRender, isAnimatingOut } = useModalAnimation(isOpen);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
+
     if (!shouldRender) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] overflow-y-auto">
-            <div className="flex min-h-screen items-center justify-center px-4 py-8">
-                <button type="button" aria-label="Close modal" onClick={onClose} className={`fixed inset-0 bg-black/70 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
-                <div className={`relative w-full ${maxWidth} rounded-2xl border border-white/10 bg-[#1e1e24]/80 p-5 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1e1e24]/80 md:p-6 text-zinc-100 ${isAnimatingOut ? 'animate-modal-panel-out' : 'animate-modal-panel-in'}`}>
-                    <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/5 pb-4">
-                        <h2 className="text-2xl font-bold text-white">{title}</h2>
-                        <button type="button" onClick={onClose} className="text-2xl leading-none text-zinc-400 hover:text-white">x</button>
-                    </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+            <button
+                type="button"
+                aria-label="Close modal"
+                onClick={onClose}
+                className={`fixed inset-0 bg-black/75 backdrop-blur-md ${
+                    isAnimatingOut ? "animate-modal-backdrop-out" : "animate-modal-backdrop-in"
+                }`}
+            />
+            <div
+                className={`relative flex flex-col w-full ${maxWidth} max-h-[88vh] rounded-2xl border border-white/15 bg-[#18181c] p-5 shadow-2xl backdrop-blur-xl md:p-6 text-zinc-100 ${
+                    isAnimatingOut ? "animate-modal-panel-out" : "animate-modal-panel-in"
+                }`}
+            >
+                <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4 shrink-0">
+                    <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white transition"
+                        aria-label="Close"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto pt-4 pr-1 scrollbar-thin scrollbar-thumb-zinc-700">
                     {children}
                 </div>
             </div>
@@ -506,15 +536,15 @@ const QuickAction = ({ onClick, icon, title, sub }: { onClick: () => void; icon:
 );
 
 const SectionHeading = ({ title }: { title: string }) => (
-    <div className="border-t border-zinc-200 pt-5 dark:border-zinc-700">
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{title}</h3>
+    <div className="border-t border-white/10 pt-5">
+        <h3 className="text-base font-bold text-white tracking-wide">{title}</h3>
     </div>
 );
 
 const ReadOnlyInfo = ({ label, value }: { label: string; value?: string }) => (
-    <div>
-        <p className="mb-1 text-xs font-semibold uppercase text-blue-700 dark:text-blue-300">{label}</p>
-        <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{value || "-"}</p>
+    <div className="rounded-lg bg-black/30 border border-white/5 p-3">
+        <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-blue-400">{label}</p>
+        <p className="text-sm font-semibold text-blue-100">{value || "-"}</p>
     </div>
 );
 
@@ -528,6 +558,9 @@ const Field = ({
     placeholder,
     textarea,
     mono,
+    maxLength,
+    inputMode,
+    pattern,
 }: {
     label: string;
     name: string;
@@ -543,7 +576,9 @@ const Field = ({
     pattern?: string;
 }) => (
     <label className="block">
-        <span className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}{required ? " *" : ""}</span>
+        <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-300">
+            {label}{required ? <span className="text-violet-400"> *</span> : ""}
+        </span>
         {textarea ? (
             <textarea
                 name={name}
@@ -552,7 +587,7 @@ const Field = ({
                 rows={3}
                 required={required}
                 placeholder={placeholder}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 transition focus:border-transparent focus:ring-2 focus:ring-violet-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                className="w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:bg-black/50 focus:ring-1 focus:ring-violet-500"
             />
         ) : (
             <input
@@ -567,7 +602,9 @@ const Field = ({
                 pattern={pattern}
                 min={type === "number" ? 1 : undefined}
                 max={type === "number" ? 150 : undefined}
-                className={`w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 transition focus:border-transparent focus:ring-2 focus:ring-violet-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 ${mono ? "font-mono uppercase" : ""}`}
+                className={`w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition focus:border-violet-500 focus:bg-black/50 focus:ring-1 focus:ring-violet-500 ${
+                    mono ? "font-mono uppercase" : ""
+                }`}
             />
         )}
     </label>
@@ -580,7 +617,7 @@ const RequestCard = ({ request, onOpen }: { request: UpdateRequestItem; onOpen: 
         <button
             type="button"
             onClick={onOpen}
-            className="w-full rounded-xl border border-violet-200 bg-white p-4 text-left shadow-sm transition hover:border-violet-400 hover:shadow-md dark:border-violet-700 dark:bg-zinc-800 dark:hover:border-violet-500"
+            className="w-full rounded-xl border border-white/10 bg-black/25 p-4 text-left shadow-sm transition hover:border-violet-500/50 hover:bg-black/40"
         >
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="grid flex-1 gap-3 text-sm md:grid-cols-4">
@@ -597,40 +634,49 @@ const RequestCard = ({ request, onOpen }: { request: UpdateRequestItem; onOpen: 
 
 const RequestDetailModal = ({ isOpen, request, onClose }: { isOpen: boolean; request?: UpdateRequestItem; onClose: () => void }) => {
     const { shouldRender, isAnimatingOut } = useModalAnimation(isOpen);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
     
     if (!shouldRender || !request) return null;
 
     const entries = Object.entries(request.requested_changes).filter(([key]) => key !== "request_type");
 
     return (
-        <div className="fixed inset-0 z-[120] overflow-y-auto">
-            <div className="flex min-h-screen items-center justify-center px-4 py-10">
-                <button type="button" aria-label="Close modal" onClick={onClose} className={`fixed inset-0 bg-black/70 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
-                <div className={`relative w-full max-w-4xl rounded-2xl border border-white/10 bg-[#1e1e24]/80 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1e1e24]/80 text-zinc-100 ${isAnimatingOut ? 'animate-modal-panel-out' : 'animate-modal-panel-in'}`}>
-                    <div className="mb-6 flex items-start justify-between gap-4 border-b border-white/5 pb-4">
-                        <div>
-                            <div className="mb-3 flex flex-wrap items-center gap-3">
-                                <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">GUEST ACCESS</span>
-                                <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Request #{request.update_request_id}</h3>
-                                <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(request.status)}`}>{request.status}</span>
-                            </div>
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">Submitted on {new Date(request.created_at).toLocaleString()}</p>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
+            <button type="button" aria-label="Close modal" onClick={onClose} className={`fixed inset-0 bg-black/80 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
+            <div className={`relative flex flex-col w-full max-w-3xl max-h-[85vh] rounded-2xl border border-white/15 bg-[#1e1e24] p-6 shadow-2xl backdrop-blur-xl text-zinc-100 ${isAnimatingOut ? 'animate-modal-panel-out' : 'animate-modal-panel-in'}`}>
+                <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4 shrink-0">
+                    <div>
+                        <div className="mb-2 flex flex-wrap items-center gap-3">
+                            <span className="rounded-full bg-violet-500/20 border border-violet-500/30 px-3 py-1 text-xs font-bold text-violet-300">GUEST ACCESS</span>
+                            <h3 className="text-xl font-bold text-white">Request #{request.update_request_id}</h3>
+                            <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(request.status)}`}>{request.status}</span>
                         </div>
-                        <button type="button" onClick={onClose} className="text-2xl leading-none text-zinc-400 hover:text-white">x</button>
+                        <p className="text-xs text-zinc-400">Submitted on {new Date(request.created_at).toLocaleString()}</p>
                     </div>
+                    <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white transition">✕</button>
+                </div>
 
-                    <div className="grid gap-3 md:grid-cols-2">
+                <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+                    <div className="grid gap-3 sm:grid-cols-2">
                         {entries.map(([key, value]) => (
-                            <div key={key} className="rounded border border-white/5 bg-black/25 p-3">
-                                <p className="mb-1 text-xs font-semibold uppercase text-zinc-600 dark:text-zinc-400">{labelize(key)}</p>
-                                <p className="break-words text-sm text-zinc-900 dark:text-zinc-100">{String(value || "N/A")}</p>
+                            <div key={key} className="rounded-xl border border-white/5 bg-black/30 p-3.5">
+                                <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-zinc-400">{labelize(key)}</p>
+                                <p className="break-words text-sm font-medium text-white">{String(value || "N/A")}</p>
                             </div>
                         ))}
                     </div>
 
                     {request.admin_notes && (
-                        <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-200">
-                            <strong>Admin notes:</strong> {request.admin_notes}
+                        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
+                            <strong className="text-amber-300 font-semibold">Admin notes:</strong> {request.admin_notes}
                         </div>
                     )}
                 </div>

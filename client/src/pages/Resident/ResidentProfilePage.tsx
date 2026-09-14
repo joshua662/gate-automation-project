@@ -3,7 +3,6 @@ import GateAccessService from "../../services/GateAccessService";
 import GenderService from "../../services/GenderService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
-import loginBackdrop from "../../assets/img/subdivision-gate-background.png";
 import { formatPlateInput } from "../../utils/plateOcr";
 
 const resolveProfilePictureUrl = (path?: string | null): string | null => {
@@ -454,6 +453,10 @@ const Field = ({
     disabled,
     textarea,
     mono,
+    maxLength,
+    inputMode,
+    pattern,
+    placeholder,
 }: {
     label: string;
     name: string;

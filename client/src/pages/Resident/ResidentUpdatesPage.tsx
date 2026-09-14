@@ -3,6 +3,7 @@ import GateAccessService from "../../services/GateAccessService";
 import type { UpdateRequestItem } from "../../interfaces/GateInterface";
 import Spinner from "../../components/Spinner/Spinner";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModalAnimation } from "../../hooks/useModalAnimation";
 import { formatPlateInput } from "../../utils/plateOcr";
 
 type GuestForm = {
@@ -35,6 +36,7 @@ const ResidentUpdatesPage = () => {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
     const [openRequest, setOpenRequest] = useState<number | null>(null);
     const [guestForm, setGuestForm] = useState<GuestForm>(blankGuestForm);
 
@@ -53,6 +55,7 @@ const ResidentUpdatesPage = () => {
         event.preventDefault();
         setSubmitting(true);
         setMessage("");
+        setError("");
 
         try {
             await GateAccessService.submitUpdateRequest({
@@ -64,6 +67,9 @@ const ResidentUpdatesPage = () => {
             setGuestForm(blankGuestForm);
             setMessage("Guest access request submitted for admin review.");
             load();
+        } catch (err: any) {
+            const msg = err.response?.data?.message ?? "Failed to submit guest access request.";
+            setError(msg);
         } finally {
             setSubmitting(false);
         }
@@ -82,6 +88,12 @@ const ResidentUpdatesPage = () => {
             {message && (
                 <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200">
                     {message}
+                </div>
+            )}
+
+            {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200">
+                    {error}
                 </div>
             )}
 
@@ -193,6 +205,9 @@ const Field = ({
     placeholder,
     textarea,
     mono,
+    maxLength,
+    inputMode,
+    pattern,
 }: {
     label: string;
     name: string;
@@ -278,42 +293,80 @@ const RequestCard = ({ request, onOpen, compact }: { request: UpdateRequestItem;
 };
 
 const RequestModal = ({ request, onClose }: { request?: UpdateRequestItem; onClose: () => void }) => {
-    if (!request) return null;
+    const { shouldRender, isAnimatingOut } = useModalAnimation(!!request);
+
+    useEffect(() => {
+        if (request) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [request]);
+
+    if (!shouldRender || !request) return null;
 
     const entries = Object.entries(request.requested_changes).filter(([key]) => key !== "request_type");
     const isGuest = request.requested_changes.request_type === "guest_access";
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-screen items-center justify-center px-4 py-10">
-                <button type="button" aria-label="Close modal" onClick={onClose} className="fixed inset-0 bg-black/70 backdrop-blur-md" />
-                <div className="relative w-full max-w-4xl rounded-2xl border border-white/10 bg-[#1e1e24]/80 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1e1e24]/80 text-zinc-100">
-                    <div className="mb-6 flex items-start justify-between gap-4 border-b border-white/5 pb-4">
-                        <div>
-                            <div className="mb-3 flex flex-wrap items-center gap-3">
-                                <span className={`rounded-full px-3 py-1 text-xs font-bold ${isGuest ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}>
-                                    {isGuest ? "GUEST ACCESS" : "PROFILE UPDATE"}
-                                </span>
-                                <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Request #{request.update_request_id}</h3>
-                                <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(request.status)}`}>{request.status}</span>
-                            </div>
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">Submitted on {new Date(request.created_at).toLocaleString()}</p>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
+            <button
+                type="button"
+                aria-label="Close modal"
+                onClick={onClose}
+                className={`fixed inset-0 bg-black/75 backdrop-blur-md ${
+                    isAnimatingOut ? "animate-modal-backdrop-out" : "animate-modal-backdrop-in"
+                }`}
+            />
+            <div
+                className={`relative flex flex-col w-full max-w-3xl max-h-[85vh] rounded-2xl border border-white/15 bg-[#1e1e24] p-6 shadow-2xl backdrop-blur-xl text-zinc-100 ${
+                    isAnimatingOut ? "animate-modal-panel-out" : "animate-modal-panel-in"
+                }`}
+            >
+                <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4 shrink-0">
+                    <div>
+                        <div className="mb-2 flex flex-wrap items-center gap-3">
+                            <span
+                                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                                    isGuest
+                                        ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
+                                        : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                }`}
+                            >
+                                {isGuest ? "GUEST ACCESS" : "PROFILE UPDATE"}
+                            </span>
+                            <h3 className="text-xl font-bold text-white">Request #{request.update_request_id}</h3>
+                            <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(request.status)}`}>
+                                {request.status}
+                            </span>
                         </div>
-                        <button type="button" onClick={onClose} className="text-2xl leading-none text-zinc-400 hover:text-white">x</button>
+                        <p className="text-xs text-zinc-400">Submitted on {new Date(request.created_at).toLocaleString()}</p>
                     </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/10 hover:text-white transition"
+                    >
+                        ✕
+                    </button>
+                </div>
 
-                    <div className="grid gap-3 md:grid-cols-2">
+                <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1 scrollbar-thin scrollbar-thumb-zinc-700">
+                    <div className="grid gap-3 sm:grid-cols-2">
                         {entries.map(([key, value]) => (
-                            <div key={key} className="rounded border border-white/5 bg-black/25 p-3">
-                                <p className="mb-1 text-xs font-semibold uppercase text-zinc-600 dark:text-zinc-400">{labelize(key)}</p>
-                                <p className="break-words text-sm text-zinc-900 dark:text-zinc-100">{String(value || "N/A")}</p>
+                            <div key={key} className="rounded-xl border border-white/5 bg-black/30 p-3.5">
+                                <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-zinc-400">{labelize(key)}</p>
+                                <p className="break-words text-sm font-medium text-white">{String(value || "N/A")}</p>
                             </div>
                         ))}
                     </div>
 
                     {request.admin_notes && (
-                        <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-200">
-                            <strong>Admin notes:</strong> {request.admin_notes}
+                        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
+                            <strong className="text-amber-300 font-semibold">Admin notes:</strong> {request.admin_notes}
                         </div>
                     )}
                 </div>

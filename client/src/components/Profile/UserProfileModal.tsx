@@ -82,6 +82,7 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user, on
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [genders, setGenders] = useState<{ gender_id: number; gender: string }[]>([]);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
   const [statusModal, setStatusModal] = useState<{ type: "success" | "error"; title: string; message: string; hideConfirmButton?: boolean } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -297,6 +298,11 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user, on
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-4 sm:p-6 lg:p-8 text-white">
+            {saveError && (
+              <div className="mb-4 rounded-lg bg-red-500/20 border border-red-500/40 p-3 text-xs text-red-200">
+                {saveError}
+              </div>
+            )}
             <input
               type="file"
               ref={fileInputRef}

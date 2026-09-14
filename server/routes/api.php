@@ -76,8 +76,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(GateLogController::class)->prefix('/gate-log')->group(function () {
             Route::get('/loadGateLogs', 'loadGateLogs');
-            Route::get('/export/csv', 'exportCsv');
-            Route::get('/export/pdf', 'exportPdf');
         });
 
         Route::get('/activity-log/loadActivityLogs', [ActivityLogController::class, 'loadActivityLogs']);
@@ -91,6 +89,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:resident')->group(function () {
         Route::controller(GateLogController::class)->prefix('/gate-log')->group(function () {
             Route::get('/my-logs', 'loadGateLogs');
+            Route::get('/export/csv', 'exportCsv');
+            Route::get('/export/pdf', 'exportPdf');
         });
 
         Route::controller(UpdateRequestController::class)->prefix('/update-request')->group(function () {
