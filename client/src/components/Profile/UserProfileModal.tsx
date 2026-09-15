@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FC, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import GateAccessService from "../../services/GateAccessService";
 import GenderService from "../../services/GenderService";
@@ -289,7 +290,7 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user, on
   const inputClass =
     "mt-1.5 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500 focus:bg-black/50 transition-colors";
 
-  return (
+  return createPortal(
     <>
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-opacity ${isAnimatingOut ? 'opacity-0' : 'opacity-100'}`} onClick={onClose}>
         <div className={`fixed inset-0 bg-black/70 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
@@ -667,7 +668,8 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, user, on
         onConfirm={() => setStatusModal(null)}
         onClose={() => setStatusModal(null)}
       />
-    </>
+    </>,
+    document.body
   );
 };
 
@@ -741,7 +743,7 @@ const ProfileActionModal = ({
       ? "bg-green-600 hover:bg-green-500"
       : "bg-blue-600 hover:bg-blue-500";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
       <button type="button" aria-label="Close modal" onClick={onClose} className={`absolute inset-0 bg-black/80 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
       <div className={`relative w-full max-w-md rounded-xl border border-white/10 bg-[#1e1e24]/90 p-6 text-white shadow-2xl backdrop-blur-xl ${isAnimatingOut ? 'animate-modal-panel-out' : 'animate-modal-panel-in'}`}>
@@ -772,7 +774,8 @@ const ProfileActionModal = ({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

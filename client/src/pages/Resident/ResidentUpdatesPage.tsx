@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import GateAccessService from "../../services/GateAccessService";
 import type { UpdateRequestItem } from "../../interfaces/GateInterface";
 import Spinner from "../../components/Spinner/Spinner";
@@ -311,7 +312,7 @@ const RequestModal = ({ request, onClose }: { request?: UpdateRequestItem; onClo
     const entries = Object.entries(request.requested_changes).filter(([key]) => key !== "request_type");
     const isGuest = request.requested_changes.request_type === "guest_access";
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
             <button
                 type="button"
@@ -371,7 +372,8 @@ const RequestModal = ({ request, onClose }: { request?: UpdateRequestItem; onClo
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

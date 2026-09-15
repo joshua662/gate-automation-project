@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import GateAccessService from "../../services/GateAccessService";
 import type { UpdateRequestItem } from "../../interfaces/GateInterface";
 
@@ -181,7 +182,7 @@ const RequestModal = ({ request, onClose, onApprove, onReject }: { request: Upda
     const guest = isGuestRequest(request);
     const tone = guest ? "purple" : "blue";
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-screen items-center justify-center px-4 py-10">
                 <button type="button" aria-label="Close modal" onClick={onClose} className="fixed inset-0 bg-white/80 backdrop-blur-sm dark:bg-zinc-900/80" />
@@ -218,7 +219,8 @@ const RequestModal = ({ request, onClose, onApprove, onReject }: { request: Upda
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

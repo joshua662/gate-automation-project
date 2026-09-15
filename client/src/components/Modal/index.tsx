@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, type FC, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import ModalCloseButton from "../Button/ModalCloseButton";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
 
@@ -64,35 +65,34 @@ const Modal: FC<ModalProps> = ({
 
   if (!shouldRender) return null;
 
-  return (
-    <>
-      <div
-        className="modal fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto p-4"
-        onClick={onClose}
-      >
-        {!isFullScreen && (
-          <div
-            className={`${backdropClassName ?? "fixed inset-0 h-full w-full bg-neutral/30 backdrop-blur-md"} ${isAnimatingOut ? "animate-modal-backdrop-out" : "animate-modal-backdrop-in"}`}
-          />
-        )}
+  return createPortal(
+    <div
+      className="modal fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto p-4"
+      onClick={onClose}
+    >
+      {!isFullScreen && (
         <div
-          ref={modalRef}
-          className={`${contentClasses} ${className} ${isAnimatingOut ? "animate-modal-panel-out" : "animate-modal-panel-in"}`}
-          onClick={(e) => e.stopPropagation()}
+          className={`${backdropClassName ?? "fixed inset-0 h-full w-full bg-neutral/30 backdrop-blur-md"} ${isAnimatingOut ? "animate-modal-backdrop-out" : "animate-modal-backdrop-in"}`}
+        />
+      )}
+      <div
+        ref={modalRef}
+        className={`${contentClasses} ${className} ${isAnimatingOut ? "animate-modal-panel-out" : "animate-modal-panel-in"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {showCloseButton && <ModalCloseButton onClose={onClose} />}
+        <div
+          className={
+            bodyClassName !== undefined
+              ? `flex-1 overflow-y-auto ${bodyClassName}`
+              : "flex-1 overflow-y-auto p-4"
+          }
         >
-          {showCloseButton && <ModalCloseButton onClose={onClose} />}
-          <div
-            className={
-              bodyClassName !== undefined
-                ? `flex-1 overflow-y-auto ${bodyClassName}`
-                : "flex-1 overflow-y-auto p-4"
-            }
-          >
-            {children}
-          </div>
+          {children}
         </div>
       </div>
-    </>
+    </div>,
+    document.body
   );
 };
 export default Modal;

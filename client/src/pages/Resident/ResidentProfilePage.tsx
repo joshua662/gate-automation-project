@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import GateAccessService from "../../services/GateAccessService";
 import GenderService from "../../services/GenderService";
 import { useAuth } from "../../contexts/AuthContext";
@@ -349,7 +350,7 @@ const ResidentProfilePage = () => {
                 </aside>
             </div>
 
-            {showEditModal && (
+            {showEditModal && createPortal(
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex min-h-screen items-center justify-center px-4 py-10">
                         <button
@@ -414,7 +415,8 @@ const ResidentProfilePage = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
         </div>

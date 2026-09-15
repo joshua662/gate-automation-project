@@ -1,4 +1,5 @@
 import { useState, type FC } from "react";
+import { createPortal } from "react-dom";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
 
 interface SignOutConfirmModalProps {
@@ -22,7 +23,7 @@ const SignOutConfirmModal: FC<SignOutConfirmModalProps> = ({ isOpen, onClose, on
     }
   };
 
-  return (
+  return createPortal(
     <div
       className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-opacity duration-200 ${isAnimatingOut ? "opacity-0" : "opacity-100"}`}
       onClick={onClose}
@@ -80,7 +81,8 @@ const SignOutConfirmModal: FC<SignOutConfirmModalProps> = ({ isOpen, onClose, on
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

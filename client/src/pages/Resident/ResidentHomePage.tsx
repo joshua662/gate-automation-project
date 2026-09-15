@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import GateAccessService from "../../services/GateAccessService";
 import type { GateLog, NotificationItem, UpdateRequestItem } from "../../interfaces/GateInterface";
 import { useAuth } from "../../contexts/AuthContext";
@@ -436,7 +437,7 @@ const DashboardModal = ({
 
     if (!shouldRender) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8">
             <button
                 type="button"
@@ -466,7 +467,8 @@ const DashboardModal = ({
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -648,7 +650,7 @@ const RequestDetailModal = ({ isOpen, request, onClose }: { isOpen: boolean; req
 
     const entries = Object.entries(request.requested_changes).filter(([key]) => key !== "request_type");
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
             <button type="button" aria-label="Close modal" onClick={onClose} className={`fixed inset-0 bg-black/80 backdrop-blur-md ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
             <div className={`relative flex flex-col w-full max-w-3xl max-h-[85vh] rounded-2xl border border-white/15 bg-[#1e1e24] p-6 shadow-2xl backdrop-blur-xl text-zinc-100 ${isAnimatingOut ? 'animate-modal-panel-out' : 'animate-modal-panel-in'}`}>
@@ -681,7 +683,8 @@ const RequestDetailModal = ({ isOpen, request, onClose }: { isOpen: boolean; req
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -744,7 +747,7 @@ const ImagePreviewModal = ({ src, onClose }: { src: string | null; onClose: () =
     const { shouldRender, isAnimatingOut } = useModalAnimation(!!src);
     if (!shouldRender || !src) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
             <button type="button" aria-label="Close modal" onClick={onClose} className={`fixed inset-0 bg-black/80 backdrop-blur-sm ${isAnimatingOut ? 'animate-modal-backdrop-out' : 'animate-modal-backdrop-in'}`} />
             <div className={`relative max-h-[90vh] max-w-[90vw] overflow-hidden rounded-xl border border-white/10 shadow-2xl ${isAnimatingOut ? 'animate-modal-panel-out' : 'animate-modal-panel-in'}`}>
@@ -753,7 +756,8 @@ const ImagePreviewModal = ({ src, onClose }: { src: string | null; onClose: () =
                     <Svg><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></Svg>
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

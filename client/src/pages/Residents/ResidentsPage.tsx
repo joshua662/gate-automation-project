@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import GateAccessService from "../../services/GateAccessService";
 import GenderService from "../../services/GenderService";
 import type { ResidentRow } from "../../interfaces/GateInterface";
@@ -330,7 +331,7 @@ const ResidentModal = ({
     setForm: (form: ResidentForm) => void;
     onClose: () => void;
     onSubmit: (event: FormEvent) => void;
-}) => (
+}) => createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-screen items-center justify-center px-4 py-10">
             <button type="button" aria-label="Close modal" onClick={onClose} className="fixed inset-0 bg-white/80 backdrop-blur-sm dark:bg-zinc-900/80" />
@@ -387,7 +388,8 @@ const ResidentModal = ({
                 </form>
             </div>
         </div>
-    </div>
+    </div>,
+    document.body
 );
 
 const Field = ({ label, value, onChange, type = "text", required, textarea, mono, maxLength, inputMode, pattern, placeholder }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; textarea?: boolean; mono?: boolean; maxLength?: number; inputMode?: "search" | "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "none"; pattern?: string; placeholder?: string }) => (

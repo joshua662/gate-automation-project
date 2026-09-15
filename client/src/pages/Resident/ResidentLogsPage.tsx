@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import GateAccessService from "../../services/GateAccessService";
 import type { GateLog } from "../../interfaces/GateInterface";
 import Spinner from "../../components/Spinner/Spinner";
@@ -265,7 +266,7 @@ const ResidentLogsPage = () => {
             </div>
 
             {/* Image Preview Modal */}
-            {imagePreview && (
+            {imagePreview && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
                     <div className="relative max-h-[90vh] max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 p-4 shadow-2xl">
                         <div className="mb-3 flex items-center justify-between">
@@ -276,7 +277,8 @@ const ResidentLogsPage = () => {
                         </div>
                         <img src={imagePreview} alt="Captured plate" className="max-h-[75vh] w-full rounded-lg object-contain" />
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
