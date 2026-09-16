@@ -78,7 +78,7 @@ class UnderlineInputField extends StatelessWidget {
             inputFormatters: inputFormatters,
             maxLength: maxLength,
             buildCounter: maxLength != null
-                ? (context, {required currentLength, isFocused, maxLength}) => null
+                ? (context, {required currentLength, required isFocused, required maxLength}) => null
                 : null,
             style: TextStyle(
               fontSize: 14.5.sp,

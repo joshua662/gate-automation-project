@@ -1433,7 +1433,7 @@ class _ModalField extends StatelessWidget {
           inputFormatters: inputFormatters,
           maxLength: maxLength,
           buildCounter: maxLength != null
-              ? (context, {required currentLength, isFocused, maxLength}) => null
+              ? (context, {required currentLength, required isFocused, required maxLength}) => null
               : null,
           validator: validator ?? (isRequired
               ? (v) => (v == null || v.trim().isEmpty)

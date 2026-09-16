@@ -1621,7 +1621,7 @@ class _DarkModalInput extends StatelessWidget {
           inputFormatters: inputFormatters,
           maxLength: maxLength,
           buildCounter: maxLength != null
-              ? (context, {required currentLength, isFocused, maxLength}) => null
+              ? (context, {required currentLength, required isFocused, required maxLength}) => null
               : null,
           validator: validator ?? (required
               ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
