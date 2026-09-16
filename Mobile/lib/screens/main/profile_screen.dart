@@ -82,12 +82,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _emailCtrl.text = user.email;
     _usernameCtrl.text = user.username ?? user.slug ?? '';
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalCtx) => _buildEditModalBottomSheet(modalCtx),
+      barrierColor: Colors.black.withValues(alpha: 0.75),
+      barrierDismissible: true,
+      builder: (dialogCtx) => _EditProfileDialog(
+        formKey: _editFormKey,
+        firstNameCtrl: _firstNameCtrl,
+        lastNameCtrl: _lastNameCtrl,
+        contactCtrl: _contactCtrl,
+        addressCtrl: _addressCtrl,
+        plateCtrl: _plateCtrl,
+        modelCtrl: _modelCtrl,
+        colorCtrl: _colorCtrl,
+        emailCtrl: _emailCtrl,
+        usernameCtrl: _usernameCtrl,
+        onSubmit: _submitProfileChanges,
+        isSubmitting: _isSubmittingEdit,
+      ),
     );
   }
 
@@ -862,302 +874,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  // ── Edit Profile Bottom Sheet ──────────────────────────────────────────────
-  Widget _buildEditModalBottomSheet(BuildContext modalCtx) {
-    return StatefulBuilder(
-      builder: (context, setModalState) {
-        return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF161B22),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-            border: Border.all(color: const Color(0xFF30363D)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 24,
-                offset: const Offset(0, -8),
-              ),
-            ],
-          ),
-          padding: EdgeInsets.only(
-            left: 20.w,
-            right: 20.w,
-            top: 16.h,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
-          ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _editFormKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Handle bar
-                  Center(
-                    child: Container(
-                      width: 38.w,
-                      height: 4.h,
-                      margin: EdgeInsets.only(bottom: 16.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF30363D),
-                        borderRadius: BorderRadius.circular(2.r),
-                      ),
-                    ),
-                  ),
 
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Edit Profile Information',
-                              style: TextStyle(
-                                fontSize: 17.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Changes are submitted for admin approval.',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: const Color(0xFF9CA3AF),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          padding: EdgeInsets.all(6.r),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: const Color(0xFF9CA3AF),
-                            size: 18.r,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  Divider(color: const Color(0xFF30363D), height: 24.h),
-
-                  // Personal Details Header
-                  Text(
-                    'Personal Details',
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3B82F6),
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-
-                  // Name row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ModalField(
-                          label: 'First Name',
-                          controller: _firstNameCtrl,
-                          isRequired: true,
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: _ModalField(
-                          label: 'Last Name',
-                          controller: _lastNameCtrl,
-                          isRequired: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.h),
-
-                  _ModalField(
-                    label: 'Contact Number',
-                    controller: _contactCtrl,
-                    isRequired: true,
-                    maxLength: 11,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(11),
-                    ],
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'This field is required';
-                      }
-                      if (v.trim().length != 11) {
-                        return 'Contact number must be exactly 11 digits';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 12.h),
-
-                  _ModalField(label: 'Address', controller: _addressCtrl),
-                  SizedBox(height: 16.h),
-
-                  // Vehicle Details Header
-                  Text(
-                    'Vehicle Details',
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF8B5CF6),
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ModalField(
-                          label: 'Plate Number',
-                          hint: 'e.g. ABC 1234',
-                          controller: _plateCtrl,
-                          isRequired: true,
-                          inputFormatters: [PlateInputFormatter()],
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: _ModalField(
-                          label: 'Car Model',
-                          controller: _modelCtrl,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.h),
-
-                  _ModalField(label: 'Car Color', controller: _colorCtrl),
-                  SizedBox(height: 16.h),
-
-                  // Account Details Header
-                  Text(
-                    'Account Information',
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF22C55E),
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-
-                  _ModalField(
-                    label: 'Email Address',
-                    controller: _emailCtrl,
-                    isRequired: true,
-                  ),
-                  SizedBox(height: 12.h),
-                  _ModalField(
-                    label: 'Username',
-                    controller: _usernameCtrl,
-                    isRequired: true,
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // Notice box
-                  Container(
-                    padding: EdgeInsets.all(10.r),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      'Your changes will be submitted for admin review and approval. '
-                      'You will receive a notification once processed.',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: const Color(0xFF93C5FD),
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // Action buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: const Color(0xFF9CA3AF),
-                            fontSize: 12.5.sp,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      ElevatedButton(
-                        onPressed: _isSubmittingEdit
-                            ? null
-                            : () async {
-                                setModalState(() {});
-                                final success = await _submitProfileChanges();
-                                setModalState(() {});
-                                if (success && context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor:
-                              const Color(0xFF2563EB).withValues(alpha: 0.5),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 10.h,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                        ),
-                        child: _isSubmittingEdit
-                            ? SizedBox(
-                                height: 16.r,
-                                width: 16.r,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                'Submit Changes for Review',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildAvatarImage(User user) {
     if (_isUploadingAvatar) {
@@ -1214,6 +931,449 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           color: Colors.white,
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Edit Profile Dialog  (matches client web modal design)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _EditProfileDialog extends StatefulWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController firstNameCtrl;
+  final TextEditingController lastNameCtrl;
+  final TextEditingController contactCtrl;
+  final TextEditingController addressCtrl;
+  final TextEditingController plateCtrl;
+  final TextEditingController modelCtrl;
+  final TextEditingController colorCtrl;
+  final TextEditingController emailCtrl;
+  final TextEditingController usernameCtrl;
+  final Future<bool> Function() onSubmit;
+  final bool isSubmitting;
+
+  const _EditProfileDialog({
+    required this.formKey,
+    required this.firstNameCtrl,
+    required this.lastNameCtrl,
+    required this.contactCtrl,
+    required this.addressCtrl,
+    required this.plateCtrl,
+    required this.modelCtrl,
+    required this.colorCtrl,
+    required this.emailCtrl,
+    required this.usernameCtrl,
+    required this.onSubmit,
+    required this.isSubmitting,
+  });
+
+  @override
+  State<_EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<_EditProfileDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animCtrl;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
+  bool _localSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
+    _scaleAnim = Tween<double>(begin: 0.92, end: 1.0).animate(
+      CurvedAnimation(parent: _animCtrl, curve: const Cubic(0.34, 1.56, 0.64, 1)),
+    );
+    _animCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    setState(() => _localSubmitting = true);
+    final success = await widget.onSubmit();
+    if (mounted) setState(() => _localSubmitting = false);
+    if (success && mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _handleClose() async {
+    await _animCtrl.reverse();
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+        child: ScaleTransition(
+          scale: _scaleAnim,
+          child: Container(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161B22),
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: const Color(0xFF30363D)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  blurRadius: 40,
+                  spreadRadius: 4,
+                  offset: const Offset(0, 16),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20.r),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ── Cover Banner Header ────────────────────────────────────
+                  Container(
+                    height: 80.h,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/subdivision-gate-background.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withValues(alpha: 0.80),
+                            Colors.indigo.withValues(alpha: 0.30),
+                            Colors.purple.withValues(alpha: 0.55),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      padding: EdgeInsets.fromLTRB(18.w, 16.h, 14.w, 12.h),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Edit Profile',
+                                style: TextStyle(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: -0.4,
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              Text(
+                                'Changes are submitted for admin approval',
+                                style: TextStyle(
+                                  fontSize: 10.5.sp,
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Close button
+                          GestureDetector(
+                            onTap: _handleClose,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.45),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: Colors.white.withValues(alpha: 0.85),
+                                size: 18.r,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Scrollable form body ──────────────────────────────────
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, bottom + 20.h),
+                      child: Form(
+                        key: widget.formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Personal Details section
+                            _DialogSectionHeader(
+                              label: 'Personal Details',
+                              icon: Icons.person_rounded,
+                              color: const Color(0xFF3B82F6),
+                            ),
+                            SizedBox(height: 10.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _ModalField(
+                                    label: 'First Name',
+                                    controller: widget.firstNameCtrl,
+                                    isRequired: true,
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: _ModalField(
+                                    label: 'Last Name',
+                                    controller: widget.lastNameCtrl,
+                                    isRequired: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10.h),
+                            _ModalField(
+                              label: 'Contact Number',
+                              controller: widget.contactCtrl,
+                              isRequired: true,
+                              maxLength: 11,
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(11),
+                              ],
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) return 'Required';
+                                if (v.trim().length != 11) return 'Must be 11 digits';
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: 10.h),
+                            _ModalField(label: 'Address', controller: widget.addressCtrl),
+
+                            SizedBox(height: 18.h),
+
+                            // Vehicle Details section
+                            _DialogSectionHeader(
+                              label: 'Vehicle Details',
+                              icon: Icons.directions_car_rounded,
+                              color: const Color(0xFF8B5CF6),
+                            ),
+                            SizedBox(height: 10.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _ModalField(
+                                    label: 'Plate Number',
+                                    hint: 'e.g. ABC 1234',
+                                    controller: widget.plateCtrl,
+                                    isRequired: true,
+                                    inputFormatters: [PlateInputFormatter()],
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: _ModalField(
+                                    label: 'Car Model',
+                                    controller: widget.modelCtrl,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10.h),
+                            _ModalField(label: 'Car Color', controller: widget.colorCtrl),
+
+                            SizedBox(height: 18.h),
+
+                            // Account Information section
+                            _DialogSectionHeader(
+                              label: 'Account Information',
+                              icon: Icons.shield_rounded,
+                              color: const Color(0xFF22C55E),
+                            ),
+                            SizedBox(height: 10.h),
+                            _ModalField(
+                              label: 'Email Address',
+                              controller: widget.emailCtrl,
+                              isRequired: true,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            SizedBox(height: 10.h),
+                            _ModalField(
+                              label: 'Username',
+                              controller: widget.usernameCtrl,
+                              isRequired: true,
+                            ),
+
+                            SizedBox(height: 18.h),
+
+                            // Notice
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(10.r),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10.r),
+                                border: Border.all(
+                                  color: const Color(0xFF3B82F6).withValues(alpha: 0.25),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline_rounded,
+                                    color: const Color(0xFF93C5FD),
+                                    size: 15.r,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Expanded(
+                                    child: Text(
+                                      'Changes are submitted for admin review and approval. '
+                                      'You will be notified once processed.',
+                                      style: TextStyle(
+                                        fontSize: 11.sp,
+                                        color: const Color(0xFF93C5FD),
+                                        height: 1.45,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 20.h),
+
+                            // Action buttons
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: _localSubmitting ? null : _handleClose,
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                                      side: const BorderSide(color: Color(0xFF30363D)),
+                                      foregroundColor: const Color(0xFF9CA3AF),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Cancel',
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  flex: 2,
+                                  child: ElevatedButton(
+                                    onPressed: _localSubmitting ? null : _handleSubmit,
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                                      backgroundColor: const Color(0xFF2563EB),
+                                      foregroundColor: Colors.white,
+                                      disabledBackgroundColor:
+                                          const Color(0xFF2563EB).withValues(alpha: 0.45),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: _localSubmitting
+                                        ? SizedBox(
+                                            height: 18.r,
+                                            width: 18.r,
+                                            child: const CircularProgressIndicator(
+                                              strokeWidth: 2.2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text(
+                                            'Submit for Review',
+                                            style: TextStyle(
+                                              fontSize: 13.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Small coloured header row for each form section inside the dialog
+class _DialogSectionHeader extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _DialogSectionHeader({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 24.r,
+          height: 24.r,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(6.r),
+          ),
+          child: Center(child: Icon(icon, color: color, size: 13.r)),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5.sp,
+            fontWeight: FontWeight.w700,
+            color: color,
+            letterSpacing: 0.1,
+          ),
+        ),
+      ],
     );
   }
 }
