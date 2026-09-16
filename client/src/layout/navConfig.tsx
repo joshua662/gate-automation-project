@@ -29,7 +29,7 @@ export const ClipboardIcon = () => (
 
 export const ActivityIcon = () => (
     <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
 );
 
@@ -65,13 +65,21 @@ export const HelpIcon = () => (
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const adminNavItems: NavItem[] = [
-    { path: "/dashboard", label: "Dashboard", icon: <></> },
-    { path: "/activity-logs", label: "Activity Logs", icon: <></> },
-    { path: "/notifications", label: "Notifications", icon: <></> },
+    { path: "/dashboard", label: "Dashboard", icon: <HomeIcon /> },
+    { path: "/residents", label: "Residents", icon: <UsersIcon /> },
+    { path: "/gate-logs", label: "Gate Logs", icon: <ClipboardIcon /> },
+    { path: "/activity-logs", label: "Activity Logs", icon: <ActivityIcon /> },
+    { path: "/reports", label: "Reports", icon: <ChartIcon /> },
+    { path: "/notifications", label: "Notifications", icon: <BellIcon /> },
+    { path: "/update-requests", label: "Update Requests", icon: <DocumentCheckIcon /> },
 ];
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const residentNavItems: NavItem[] = [
     { path: "/resident/home", label: "Dashboard", icon: <HomeIcon /> },
+    { path: "/resident/logs", label: "Gate Logs", icon: <ClipboardIcon /> },
+    { path: "/resident/updates", label: "Update Requests", icon: <DocumentCheckIcon /> },
+    { path: "/resident/notifications", label: "Notifications", icon: <BellIcon /> },
+    { path: "/resident/profile", label: "Profile", icon: <UserIcon /> },
     { path: "/resident/help", label: "Help & Support", icon: <HelpIcon /> },
 ];
