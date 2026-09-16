@@ -7,12 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
 import '../../core/router/app_router.dart';
 import '../../core/utils/plate_input_formatter.dart';
 import '../../core/utils/toast_helper.dart';
-import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/auth/auth_page_layout.dart';
 import '../../widgets/auth/underline_input_field.dart';

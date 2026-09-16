@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../core/constants/api_constants.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/router/app_router.dart';
@@ -27,9 +25,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen>
-    with SingleTickerProviderStateMixin {
-  bool _showEditModal = false;
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _showAvatarPopover = false;
   String? _selectedAvatarPath;
   bool _isUploadingAvatar = false;
@@ -47,68 +43,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   final _usernameCtrl = TextEditingController();
   bool _isSubmittingEdit = false;
 
-  late AnimationController _editModalCtrl;
-  late Animation<double> _editModalFade;
-  late Animation<Offset> _editModalSlide;
-  late Animation<double> _cardScale;
-  late Animation<double> _cardFade;
-
-  @override
-  void initState() {
-    super.initState();
-    _editModalCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-      reverseDuration: const Duration(milliseconds: 300),
-    );
-
-    _editModalFade = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-      parent: _editModalCtrl,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeIn),
-    ));
-
-    _editModalSlide = Tween<Offset>(
-      begin: const Offset(0, 0.18),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _editModalCtrl,
-      curve: const Interval(0.1, 1.0, curve: Cubic(0.34, 1.56, 0.64, 1)),
-      reverseCurve: const Interval(0.0, 0.9, curve: Curves.easeInCubic),
-    ));
-
-    _cardScale = Tween<double>(begin: 0.88, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _editModalCtrl,
-        curve: const Interval(0.1, 1.0, curve: Cubic(0.34, 1.56, 0.64, 1)),
-        reverseCurve: const Interval(0.0, 0.9, curve: Curves.easeIn),
-      ),
-    );
-
-    _cardFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _editModalCtrl,
-        curve: const Interval(0.1, 0.7, curve: Curves.easeOut),
-        reverseCurve: const Interval(0.0, 0.6, curve: Curves.easeIn),
-      ),
-    );
-  }
-
   @override
   void didUpdateWidget(ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Close all modals whenever the tab becomes inactive (user switched away)
+    // Close popovers whenever the tab becomes inactive (user switched away)
     if (!widget.isActive && oldWidget.isActive) {
-      _editModalCtrl.reverse().then((_) {
-        if (mounted) setState(() => _showEditModal = false);
-      });
       setState(() => _showAvatarPopover = false);
     }
   }
 
   @override
   void dispose() {
-    _editModalCtrl.dispose();
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
     _contactCtrl.dispose();
@@ -136,18 +81,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     _addressCtrl.text = user.address ?? '';
     _emailCtrl.text = user.email;
     _usernameCtrl.text = user.username ?? user.slug ?? '';
-    setState(() => _showEditModal = true);
-    _editModalCtrl.forward(from: 0);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalCtx) => _buildEditModalBottomSheet(modalCtx),
+    );
   }
 
-  void _closeEditModal() {
-    _editModalCtrl.reverse().then((_) {
-      if (mounted) setState(() => _showEditModal = false);
-    });
-  }
-
-  Future<void> _submitProfileChanges() async {
-    if (!(_editFormKey.currentState?.validate() ?? false)) return;
+  Future<bool> _submitProfileChanges() async {
+    if (!(_editFormKey.currentState?.validate() ?? false)) return false;
 
     final confirmed = await ActionConfirmDialog.show(
       context,
@@ -160,7 +105,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       icon: Icons.edit_note_rounded,
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) return false;
 
     setState(() => _isSubmittingEdit = true);
     try {
@@ -210,15 +155,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       // Invalidate requests provider so resident updates screen has the latest data
       ref.invalidate(myUpdateRequestsProvider);
 
-      _closeEditModal();
       if (mounted) {
         ToastHelper.showSuccess(
             context, 'Profile changes submitted for admin review.');
       }
+      return true;
     } catch (e) {
       if (mounted) {
         ToastHelper.showError(context, 'Failed to submit profile changes: $e');
       }
+      return false;
     } finally {
       if (mounted) setState(() => _isSubmittingEdit = false);
     }
@@ -260,12 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         ),
         data: (user) {
           if (user == null) return const SkeletonProfileLoader();
-          return Stack(
-            children: [
-              _buildMainContent(user),
-              if (_showEditModal) _buildEditModal(),
-            ],
-          );
+          return _buildMainContent(user);
         },
       ),
     );
@@ -740,6 +681,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       iconColor: const Color(0xFF3B82F6),
       iconBgColor: const Color(0xFF3B82F6).withAlpha(30),
       title: 'Personal Information',
+      onEditTap: () => _openEditModal(user),
       child: Column(
         children: [
           // Row 1: First Name + Last Name
@@ -799,6 +741,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       iconColor: const Color(0xFF22C55E),
       iconBgColor: const Color(0xFF22C55E).withAlpha(30),
       title: 'Account Information',
+      onEditTap: () => _openEditModal(user),
       child: Column(
         children: [
           _InfoTile(label: 'EMAIL', value: user.email),
@@ -884,6 +827,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       iconColor: const Color(0xFF8B5CF6),
       iconBgColor: const Color(0xFF8B5CF6).withAlpha(30),
       title: 'Vehicle Information',
+      onEditTap: () => _openEditModal(user),
       child: Column(
         children: [
           // Row 1: Plate Number (highlighted) + Car Model
@@ -918,287 +862,300 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  // ── Edit Profile Modal ───────────────────────────────────────────────────
-  Widget _buildEditModal() {
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          // ── Animated Backdrop ─────────────────────────────────────────
-          Positioned.fill(
-            child: FadeTransition(
-              opacity: _editModalFade,
-              child: GestureDetector(
-                onTap: _closeEditModal,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                  child: Container(color: Colors.black.withAlpha(160)),
-                ),
+  // ── Edit Profile Bottom Sheet ──────────────────────────────────────────────
+  Widget _buildEditModalBottomSheet(BuildContext modalCtx) {
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF161B22),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            border: Border.all(color: const Color(0xFF30363D)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 24,
+                offset: const Offset(0, -8),
               ),
-            ),
+            ],
           ),
-
-          // ── Animated Card ─────────────────────────────────────────────
-          SafeArea(
-            child: Center(
-              child: SlideTransition(
-                position: _editModalSlide,
-                child: FadeTransition(
-                  opacity: _cardFade,
-                  child: ScaleTransition(
-                    scale: _cardScale,
-                    alignment: Alignment.bottomCenter,
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.all(18.r),
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: EdgeInsets.all(20.r),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF161B22),
-                            borderRadius: BorderRadius.circular(20.r),
-                            border: Border.all(color: const Color(0xFF30363D)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(220),
-                                blurRadius: 48,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 20),
-                              ),
-                            ],
-                          ),
-                          child: Form(
-                            key: _editFormKey,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Header
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Edit Profile Information',
-                                            style: TextStyle(
-                                              fontSize: 17.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          SizedBox(height: 2.h),
-                                          Text(
-                                            'Changes are submitted for admin approval.',
-                                            style: TextStyle(
-                                              fontSize: 11.sp,
-                                              color: const Color(0xFF9CA3AF),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: _closeEditModal,
-                                      child: Container(
-                                        padding: EdgeInsets.all(6.r),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withAlpha(15),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.close_rounded,
-                                          color: const Color(0xFF9CA3AF),
-                                          size: 18.r,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                Divider(color: const Color(0xFF30363D), height: 24.h),
-
-                                // Name row
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _ModalField(
-                                        label: 'First Name',
-                                        controller: _firstNameCtrl,
-                                        isRequired: true,
-                                      ),
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Expanded(
-                                      child: _ModalField(
-                                        label: 'Last Name',
-                                        controller: _lastNameCtrl,
-                                        isRequired: true,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12.h),
-
-                                _ModalField(
-                                  label: 'Contact Number',
-                                  controller: _contactCtrl,
-                                  isRequired: true,
-                                  maxLength: 11,
-                                  keyboardType: TextInputType.phone,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(11),
-                                  ],
-                                  validator: (v) {
-                                    if (v == null || v.trim().isEmpty) {
-                                      return 'This field is required';
-                                    }
-                                    if (v.trim().length != 11) {
-                                      return 'Contact number must be exactly 11 digits';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(height: 12.h),
-
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _ModalField(
-                                        label: 'Plate Number',
-                                        hint: 'e.g. ABC 1234',
-                                        controller: _plateCtrl,
-                                        isRequired: true,
-                                        inputFormatters: [PlateInputFormatter()],
-                                      ),
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Expanded(
-                                      child: _ModalField(
-                                        label: 'Car Model',
-                                        controller: _modelCtrl,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12.h),
-
-                                _ModalField(label: 'Car Color', controller: _colorCtrl),
-                                SizedBox(height: 12.h),
-
-                                _ModalField(label: 'Address', controller: _addressCtrl),
-                                SizedBox(height: 16.h),
-
-                                // ── Account Information ──
-                                Text(
-                                  'Account Information',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-
-                                _ModalField(
-                                  label: 'Email Address',
-                                  controller: _emailCtrl,
-                                  isRequired: true,
-                                ),
-                                SizedBox(height: 12.h),
-                                _ModalField(
-                                  label: 'Username',
-                                  controller: _usernameCtrl,
-                                  isRequired: true,
-                                ),
-                                SizedBox(height: 20.h),
-
-                                // Notice box
-                                Container(
-                                  padding: EdgeInsets.all(10.r),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF3B82F6).withAlpha(20),
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    border: Border.all(
-                                      color: const Color(0xFF3B82F6).withAlpha(50),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Your changes will be submitted for admin review and approval. '
-                                    'You will receive a notification once processed.',
-                                    style: TextStyle(
-                                      fontSize: 11.sp,
-                                      color: const Color(0xFF93C5FD),
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 20.h),
-
-                                // Action buttons
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton(
-                                      onPressed: _closeEditModal,
-                                      child: Text(
-                                        'Cancel',
-                                        style: TextStyle(
-                                          color: const Color(0xFF9CA3AF),
-                                          fontSize: 12.5.sp,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    ElevatedButton(
-                                      onPressed: _isSubmittingEdit ? null : _submitProfileChanges,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF2563EB),
-                                        foregroundColor: Colors.white,
-                                        disabledBackgroundColor:
-                                            const Color(0xFF2563EB).withAlpha(120),
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 16.w,
-                                          vertical: 10.h,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10.r),
-                                        ),
-                                      ),
-                                      child: _isSubmittingEdit
-                                          ? SizedBox(
-                                              height: 16.r,
-                                              width: 16.r,
-                                              child: const CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : Text(
-                                              'Submit Changes for Review',
-                                              style: TextStyle(
-                                                fontSize: 12.sp,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+          padding: EdgeInsets.only(
+            left: 20.w,
+            right: 20.w,
+            top: 16.h,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _editFormKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle bar
+                  Center(
+                    child: Container(
+                      width: 38.w,
+                      height: 4.h,
+                      margin: EdgeInsets.only(bottom: 16.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF30363D),
+                        borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
                   ),
-                ),
+
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Edit Profile Information',
+                              style: TextStyle(
+                                fontSize: 17.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'Changes are submitted for admin approval.',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: const Color(0xFF9CA3AF),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          padding: EdgeInsets.all(6.r),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: const Color(0xFF9CA3AF),
+                            size: 18.r,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Divider(color: const Color(0xFF30363D), height: 24.h),
+
+                  // Personal Details Header
+                  Text(
+                    'Personal Details',
+                    style: TextStyle(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF3B82F6),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+
+                  // Name row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ModalField(
+                          label: 'First Name',
+                          controller: _firstNameCtrl,
+                          isRequired: true,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: _ModalField(
+                          label: 'Last Name',
+                          controller: _lastNameCtrl,
+                          isRequired: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+
+                  _ModalField(
+                    label: 'Contact Number',
+                    controller: _contactCtrl,
+                    isRequired: true,
+                    maxLength: 11,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(11),
+                    ],
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'This field is required';
+                      }
+                      if (v.trim().length != 11) {
+                        return 'Contact number must be exactly 11 digits';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 12.h),
+
+                  _ModalField(label: 'Address', controller: _addressCtrl),
+                  SizedBox(height: 16.h),
+
+                  // Vehicle Details Header
+                  Text(
+                    'Vehicle Details',
+                    style: TextStyle(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF8B5CF6),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ModalField(
+                          label: 'Plate Number',
+                          hint: 'e.g. ABC 1234',
+                          controller: _plateCtrl,
+                          isRequired: true,
+                          inputFormatters: [PlateInputFormatter()],
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: _ModalField(
+                          label: 'Car Model',
+                          controller: _modelCtrl,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+
+                  _ModalField(label: 'Car Color', controller: _colorCtrl),
+                  SizedBox(height: 16.h),
+
+                  // Account Details Header
+                  Text(
+                    'Account Information',
+                    style: TextStyle(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF22C55E),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+
+                  _ModalField(
+                    label: 'Email Address',
+                    controller: _emailCtrl,
+                    isRequired: true,
+                  ),
+                  SizedBox(height: 12.h),
+                  _ModalField(
+                    label: 'Username',
+                    controller: _usernameCtrl,
+                    isRequired: true,
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // Notice box
+                  Container(
+                    padding: EdgeInsets.all(10.r),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'Your changes will be submitted for admin review and approval. '
+                      'You will receive a notification once processed.',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: const Color(0xFF93C5FD),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // Action buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: const Color(0xFF9CA3AF),
+                            fontSize: 12.5.sp,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      ElevatedButton(
+                        onPressed: _isSubmittingEdit
+                            ? null
+                            : () async {
+                                setModalState(() {});
+                                final success = await _submitProfileChanges();
+                                setModalState(() {});
+                                if (success && context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor:
+                              const Color(0xFF2563EB).withValues(alpha: 0.5),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 10.h,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                        child: _isSubmittingEdit
+                            ? SizedBox(
+                                height: 16.r,
+                                width: 16.r,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Submit Changes for Review',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1272,6 +1229,7 @@ class _SectionCard extends StatelessWidget {
   final Color iconBgColor;
   final String title;
   final Widget child;
+  final VoidCallback? onEditTap;
 
   const _SectionCard({
     required this.icon,
@@ -1279,6 +1237,7 @@ class _SectionCard extends StatelessWidget {
     required this.iconBgColor,
     required this.title,
     required this.child,
+    this.onEditTap,
   });
 
   @override
@@ -1293,29 +1252,65 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header with icon
+          // Section header with icon and optional edit trigger
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 32.r,
-                height: 32.r,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Center(
-                  child: Icon(icon, color: iconColor, size: 18.r),
-                ),
+              Row(
+                children: [
+                  Container(
+                    width: 32.r,
+                    height: 32.r,
+                    decoration: BoxDecoration(
+                      color: iconBgColor,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Center(
+                      child: Icon(icon, color: iconColor, size: 18.r),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 10.w),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              if (onEditTap != null)
+                GestureDetector(
+                  onTap: onEditTap,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF21262D),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(color: const Color(0xFF363B42)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.edit_outlined,
+                          color: const Color(0xFF9CA3AF),
+                          size: 13.r,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'Edit',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF9CA3AF),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
           SizedBox(height: 16.h),
