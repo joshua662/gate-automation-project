@@ -86,7 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-    Route::middleware('role:resident')->group(function () {
+    Route::middleware('role:resident,security_guard,admin')->group(function () {
         Route::controller(GateLogController::class)->prefix('/gate-log')->group(function () {
             Route::get('/my-logs', 'loadGateLogs');
             Route::get('/export/csv', 'exportCsv');

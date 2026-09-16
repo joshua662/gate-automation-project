@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AuthInputField extends StatefulWidget {
@@ -14,6 +15,8 @@ class AuthInputField extends StatefulWidget {
   final String? Function(String?)? validator;
   final bool readOnly;
   final VoidCallback? onTap;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AuthInputField({
     super.key,
@@ -29,6 +32,8 @@ class AuthInputField extends StatefulWidget {
     this.validator,
     this.readOnly = false,
     this.onTap,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   @override
@@ -87,6 +92,8 @@ class _AuthInputFieldState extends State<AuthInputField> {
             validator: widget.validator,
             readOnly: widget.readOnly,
             onTap: widget.onTap,
+            textCapitalization: widget.textCapitalization,
+            inputFormatters: widget.inputFormatters,
             style: TextStyle(
               fontSize: 14.sp,
               color: Colors.white,
