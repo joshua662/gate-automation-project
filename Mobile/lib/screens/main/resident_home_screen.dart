@@ -16,8 +16,13 @@ enum ResidentModalType { notifications, logs, guest, profile, none }
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   final Function(int)? onNavigateTab;
+  final bool isActive;
 
-  const ResidentHomeScreen({super.key, this.onNavigateTab});
+  const ResidentHomeScreen({
+    super.key,
+    this.onNavigateTab,
+    this.isActive = true,
+  });
 
   @override
   ConsumerState<ResidentHomeScreen> createState() => _ResidentHomeScreenState();
@@ -74,6 +79,16 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
 
   void _closeModal() {
     setState(() => _activeModal = ResidentModalType.none);
+  }
+
+  @override
+  void didUpdateWidget(ResidentHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isActive && !widget.isActive) {
+      if (_activeModal != ResidentModalType.none) {
+        setState(() => _activeModal = ResidentModalType.none);
+      }
+    }
   }
 
   Future<void> _submitGuestAccess() async {

@@ -30,7 +30,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
 
     final tabs = [
-      ResidentHomeScreen(onNavigateTab: _onNavigateTab),
+      ResidentHomeScreen(
+        onNavigateTab: _onNavigateTab,
+        isActive: _currentIndex == 0,
+      ),
       const ResidentNotificationsScreen(),
       ProfileScreen(isActive: _currentIndex == 2),
     ];
