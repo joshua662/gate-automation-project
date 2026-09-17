@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/utils/toast_helper.dart';
 import '../../models/update_request_model.dart';
 import '../../providers/resident_provider.dart';
+import '../../widgets/animated_list_item.dart';
 
 class ResidentUpdatesScreen extends ConsumerStatefulWidget {
   const ResidentUpdatesScreen({super.key});
@@ -227,12 +228,17 @@ class _ResidentUpdatesScreenState
               }
 
               return Column(
-                children: requests
-                    .map((req) => _RequestTile(
-                          req: req,
-                          onTap: () => _showTicketDialog(context, req),
-                        ))
-                    .toList(),
+                children: List.generate(requests.length, (i) {
+                  final req = requests[i];
+                  return AnimatedListItem(
+                    index: i,
+                    staggerDelay: const Duration(milliseconds: 55),
+                    child: _RequestTile(
+                      req: req,
+                      onTap: () => _showTicketDialog(context, req),
+                    ),
+                  );
+                }),
               );
             },
           ),
@@ -243,9 +249,27 @@ class _ResidentUpdatesScreenState
   }
 
   void _showTicketDialog(BuildContext context, UpdateRequestModel req) {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (ctx) => Dialog(
+      barrierDismissible: true,
+      barrierLabel: 'Ticket',
+      barrierColor: Colors.black.withAlpha(180),
+      transitionDuration: const Duration(milliseconds: 280),
+      transitionBuilder: (ctx, animation, _, child) {
+        final curve = CurvedAnimation(
+          parent: animation,
+          curve: const Cubic(0.34, 1.56, 0.64, 1.0),
+          reverseCurve: Curves.easeIn,
+        );
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.92, end: 1.0).animate(curve),
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (ctx, _, __) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
         child: Container(

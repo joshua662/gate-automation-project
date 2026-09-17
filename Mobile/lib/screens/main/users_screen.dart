@@ -7,6 +7,7 @@ import '../../core/constants/app_strings.dart';
 import '../../core/router/app_router.dart';
 import '../../core/utils/toast_helper.dart';
 import '../../providers/user_provider.dart';
+import '../../widgets/animated_list_item.dart';
 import '../../widgets/app_loading.dart';
 import '../../widgets/modals/action_confirm_dialog.dart';
 import '../../widgets/user_card.dart';
@@ -196,23 +197,27 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final user = filtered[index];
-                      return UserCard(
-                        user: user,
-                        onTap: () => Navigator.of(context).pushNamed(
-                          AppRouter.viewUser,
-                          arguments: user,
-                        ),
-                        onEdit: () async {
-                          await Navigator.of(context).pushNamed(
-                            AppRouter.editUser,
+                      return AnimatedListItem(
+                        index: index,
+                        staggerDelay: const Duration(milliseconds: 50),
+                        child: UserCard(
+                          user: user,
+                          onTap: () => Navigator.of(context).pushNamed(
+                            AppRouter.viewUser,
                             arguments: user,
-                          );
-                          ref.read(usersProvider.notifier).refresh();
-                        },
-                        onDelete: () => _confirmDelete(user.id, user.name),
-                        onRestore: user.isDeleted
-                            ? () => _restore(user.id)
-                            : null,
+                          ),
+                          onEdit: () async {
+                            await Navigator.of(context).pushNamed(
+                              AppRouter.editUser,
+                              arguments: user,
+                            );
+                            ref.read(usersProvider.notifier).refresh();
+                          },
+                          onDelete: () => _confirmDelete(user.id, user.name),
+                          onRestore: user.isDeleted
+                              ? () => _restore(user.id)
+                              : null,
+                        ),
                       );
                     },
                   ),

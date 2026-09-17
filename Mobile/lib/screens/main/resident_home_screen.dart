@@ -1416,7 +1416,7 @@ class _QuickLinkAction extends StatelessWidget {
   }
 }
 
-class _DashboardModalShell extends StatelessWidget {
+class _DashboardModalShell extends StatefulWidget {
   final String title;
   final VoidCallback onClose;
   final Widget child;
@@ -1428,6 +1428,44 @@ class _DashboardModalShell extends StatelessWidget {
   });
 
   @override
+  State<_DashboardModalShell> createState() => _DashboardModalShellState();
+}
+
+class _DashboardModalShellState extends State<_DashboardModalShell>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animCtrl;
+  late Animation<double> _scaleAnim;
+  late Animation<double> _fadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
+    _scaleAnim = Tween<double>(begin: 0.92, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animCtrl,
+        curve: const Cubic(0.34, 1.56, 0.64, 1),
+      ),
+    );
+    _animCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  void _handleClose() async {
+    await _animCtrl.reverse();
+    if (mounted) widget.onClose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Positioned.fill(
       child: Stack(
@@ -1435,11 +1473,14 @@ class _DashboardModalShell extends StatelessWidget {
           // Dark backdrop filter
           Positioned.fill(
             child: GestureDetector(
-              onTap: onClose,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  color: Colors.black.withAlpha(180),
+              onTap: _handleClose,
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: Container(
+                    color: Colors.black.withAlpha(180),
+                  ),
                 ),
               ),
             ),
@@ -1449,62 +1490,68 @@ class _DashboardModalShell extends StatelessWidget {
             child: Center(
               child: Padding(
                 padding: EdgeInsets.all(20.r),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24.r),
-                  child: Container(
-                    padding: EdgeInsets.all(20.r),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFA1E1E24),
+                child: FadeTransition(
+                  opacity: _fadeAnim,
+                  child: ScaleTransition(
+                    scale: _scaleAnim,
+                    child: ClipRRect(
                       borderRadius: BorderRadius.circular(24.r),
-                      border: Border.all(
-                        color: Colors.white.withAlpha(30),
-                        width: 1,
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black87,
-                          blurRadius: 32,
-                          offset: Offset(0, 16),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: onClose,
-                              child: Container(
-                                padding: EdgeInsets.all(4.r),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha(20),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.white70,
-                                  size: 18.r,
-                                ),
-                              ),
+                      child: Container(
+                        padding: EdgeInsets.all(20.r),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFA1E1E24),
+                          borderRadius: BorderRadius.circular(24.r),
+                          border: Border.all(
+                            color: Colors.white.withAlpha(30),
+                            width: 1,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black87,
+                              blurRadius: 32,
+                              offset: Offset(0, 16),
                             ),
                           ],
                         ),
-                        Divider(
-                          color: Colors.white.withAlpha(20),
-                          height: 24.h,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  widget.title,
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: _handleClose,
+                                  child: Container(
+                                    padding: EdgeInsets.all(4.r),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha(20),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      color: Colors.white70,
+                                      size: 18.r,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Divider(
+                              color: Colors.white.withAlpha(20),
+                              height: 24.h,
+                            ),
+                            Flexible(child: widget.child),
+                          ],
                         ),
-                        Flexible(child: child),
-                      ],
+                      ),
                     ),
                   ),
                 ),

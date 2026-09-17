@@ -82,10 +82,10 @@ class _ConfirmationDialogContentState extends State<_ConfirmationDialogContent>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 280),
     );
     _scaleAnim = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOutBack),
+      CurvedAnimation(parent: _animController, curve: const Cubic(0.34, 1.56, 0.64, 1)),
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _animController.forward();

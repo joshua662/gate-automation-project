@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/gate_log_model.dart';
 import '../../providers/resident_provider.dart';
+import '../../widgets/animated_list_item.dart';
 import '../../widgets/skeleton_loader.dart';
 
 class ResidentLogsScreen extends ConsumerWidget {
@@ -105,7 +106,11 @@ class ResidentLogsScreen extends ConsumerWidget {
                     ),
                   )
                 else
-                  ...logs.map((log) => _LogItemTile(log: log)),
+                  ...List.generate(logs.length, (i) => AnimatedListItem(
+                    index: i,
+                    staggerDelay: const Duration(milliseconds: 50),
+                    child: _LogItemTile(log: logs[i]),
+                  )),
               ],
             ),
           );

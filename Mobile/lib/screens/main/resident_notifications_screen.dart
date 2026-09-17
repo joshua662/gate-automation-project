@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/notification_model.dart';
 import '../../providers/resident_provider.dart';
+import '../../widgets/animated_list_item.dart';
 import '../../widgets/skeleton_loader.dart';
 
 class ResidentNotificationsScreen extends ConsumerWidget {
@@ -144,7 +145,11 @@ class ResidentNotificationsScreen extends ConsumerWidget {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final notif = notifications[index];
-                          return _NotificationTile(notif: notif);
+                          return AnimatedListItem(
+                            index: index,
+                            staggerDelay: const Duration(milliseconds: 55),
+                            child: _NotificationTile(notif: notif),
+                          );
                         },
                         childCount: notifications.length,
                       ),

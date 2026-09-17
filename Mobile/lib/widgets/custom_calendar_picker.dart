@@ -11,12 +11,18 @@ Future<DateTime?> showCustomCalendarPicker({
     barrierDismissible: true,
     barrierLabel: 'Calendar',
     barrierColor: Colors.black.withOpacity(0.6),
-    transitionDuration: const Duration(milliseconds: 300),
+    transitionDuration: const Duration(milliseconds: 280),
     transitionBuilder: (ctx, animation, secondary, child) {
-      final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+      final curve = CurvedAnimation(
+        parent: animation,
+        curve: const Cubic(0.34, 1.56, 0.64, 1),
+      );
       return FadeTransition(
-        opacity: curve,
-        child: ScaleTransition(scale: Tween<double>(begin: 0.88, end: 1.0).animate(curve), child: child),
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.92, end: 1.0).animate(curve),
+          child: child,
+        ),
       );
     },
     pageBuilder: (ctx, _, __) => _CalendarDialog(initialDate: initialDate ?? DateTime.now()),

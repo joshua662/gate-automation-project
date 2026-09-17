@@ -68,11 +68,11 @@ class _ActionConfirmDialogState extends State<ActionConfirmDialog>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 280),
     );
 
     // Client's modal-panel-in: cubic-bezier(0.34, 1.56, 0.64, 1)
-    _scaleAnim = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnim = Tween<double>(begin: 0.92, end: 1.0).animate(
       CurvedAnimation(
         parent: _animController,
         curve: const Cubic(0.34, 1.56, 0.64, 1.0),
