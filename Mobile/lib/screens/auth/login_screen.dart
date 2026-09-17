@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/router/app_router.dart';
-import '../../core/utils/plate_input_formatter.dart';
 import '../../core/utils/toast_helper.dart';
 import '../../models/auth/login_state.dart';
 import '../../providers/login_provider.dart';
@@ -23,11 +21,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  final _plateCtrl = TextEditingController();
-  final _contactCtrl = TextEditingController();
 
   bool _rememberMe = true;
-  bool _isPlateLogin = false;
 
   late AnimationController _staggerController;
   late Animation<double> _brandingFade;
@@ -65,24 +60,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _staggerController.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
-    _plateCtrl.dispose();
-    _contactCtrl.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (_isPlateLogin) {
-      ref.read(loginProvider.notifier).residentLoginByPlate(
-            _plateCtrl.text.trim().toUpperCase(),
-            _contactCtrl.text.trim(),
-          );
-    } else {
-      ref.read(loginProvider.notifier).login(
-            _emailCtrl.text.trim(),
-            _passwordCtrl.text,
-          );
-    }
+    ref.read(loginProvider.notifier).login(
+          _emailCtrl.text.trim(),
+          _passwordCtrl.text,
+        );
   }
 
   @override
@@ -137,9 +123,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    _isPlateLogin
-                        ? 'Sign in using your registered plate number & 11-digit contact number.'
-                        : 'Sign in to reach your gate dashboard and stay on top of access activity.',
+                    'Sign in to reach your gate dashboard and stay on top of access activity.',
                     style: TextStyle(
                       fontSize: 13.sp,
                       color: const Color(0xE0DDD6FE), // text-violet-200/88
@@ -157,138 +141,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               opacity: _formFade,
               child: Column(
                 children: [
-                  // ── Mode Switcher Tabs ───────────────────────────────────
-                  Container(
-                    margin: EdgeInsets.only(bottom: 20.h),
-                    padding: EdgeInsets.all(4.r),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(20),
-                      borderRadius: BorderRadius.circular(24.r),
-                      border: Border.all(color: Colors.white.withAlpha(30)),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isPlateLogin = false),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8.h),
-                              decoration: BoxDecoration(
-                                color: !_isPlateLogin
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Text(
-                                'Account Login',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12.5.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: !_isPlateLogin
-                                      ? const Color(0xFF0F172A)
-                                      : Colors.white70,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isPlateLogin = true),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8.h),
-                              decoration: BoxDecoration(
-                                color: _isPlateLogin
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Text(
-                                'Plate Login',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12.5.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: _isPlateLogin
-                                      ? const Color(0xFF0F172A)
-                                      : Colors.white70,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  // ── Account Login Fields ─────────────────────────────
+                  AuthInputField(
+                    label: 'Username',
+                    hint: 'Enter your username or email',
+                    controller: _emailCtrl,
+                    required: true,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Username or email is required';
+                      }
+                      return null;
+                    },
                   ),
-
-                  if (!_isPlateLogin) ...[
-                    // ── Account Login Fields ─────────────────────────────
-                    AuthInputField(
-                      label: 'Username',
-                      hint: 'Enter your username or email',
-                      controller: _emailCtrl,
-                      required: true,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Username or email is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    AuthInputField(
-                      label: 'Password',
-                      hint: '••••••••',
-                      controller: _passwordCtrl,
-                      isPassword: true,
-                      required: true,
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return 'Password is required';
-                        }
-                        return null;
-                      },
-                    ),
-                  ] else ...[
-                    // ── Plate & Contact Login Fields ─────────────────────
-                    AuthInputField(
-                      label: 'Plate Number',
-                      hint: 'e.g. ABC 1234',
-                      controller: _plateCtrl,
-                      required: true,
-                      textCapitalization: TextCapitalization.characters,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
-                        PlateInputFormatter(),
-                      ],
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Plate number is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    AuthInputField(
-                      label: 'Contact Number',
-                      hint: '09XXXXXXXXX',
-                      controller: _contactCtrl,
-                      required: true,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(11),
-                      ],
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Contact number is required';
-                        }
-                        if (v.trim().length != 11) {
-                          return 'Contact number must be exactly 11 digits';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
+                  AuthInputField(
+                    label: 'Password',
+                    hint: '••••••••',
+                    controller: _passwordCtrl,
+                    isPassword: true,
+                    required: true,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return 'Password is required';
+                      }
+                      return null;
+                    },
+                  ),
 
                   // ── Remember Me & Forgot Password ─────────────────────────
                   Row(
@@ -333,20 +211,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ],
                         ),
                       ),
-                      if (!_isPlateLogin)
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(AppRouter.forgotPassword);
-                          },
-                          child: Text(
-                            'Forgot password?',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xF2DDD6FE), // violet-200/95
-                            ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamed(AppRouter.forgotPassword);
+                        },
+                        child: Text(
+                          'Forgot password?',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xF2DDD6FE), // violet-200/95
                           ),
                         ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 28.h),
@@ -377,7 +254,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               ),
                             )
                           : Text(
-                              _isPlateLogin ? 'Plate Log In' : 'Log In',
+                              'Log In',
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
