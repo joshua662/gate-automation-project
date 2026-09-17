@@ -2,9 +2,11 @@ import { useEffect, useState, useMemo } from "react";
 import PortalLayout from "./PortalLayout";
 import { adminNavItems } from "./navConfig";
 import GateAccessService from "../services/GateAccessService";
+import { useAuth } from "../contexts/AuthContext";
 
 const AppLayout = () => {
     const [unreadCount, setUnreadCount] = useState(0);
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchUnread = () => {
@@ -28,13 +30,22 @@ const AppLayout = () => {
     }, []);
 
     const navItemsWithBadges = useMemo(() => {
-        return adminNavItems.map(item => {
+        let items = adminNavItems;
+        const role = user?.user?.role as string | undefined;
+
+        if (role === 'guard' || role === 'security_guard') {
+            items = items.filter(item => 
+                !['Residents', 'Reports', 'Update Requests'].includes(item.label)
+            );
+        }
+
+        return items.map(item => {
             if (item.label === "Notifications") {
                 return { ...item, badgeCount: unreadCount };
             }
             return item;
         });
-    }, [unreadCount]);
+    }, [unreadCount, user]);
 
     return (
         <PortalLayout
