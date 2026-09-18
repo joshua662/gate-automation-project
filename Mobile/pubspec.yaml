@@ -45,6 +45,7 @@ dependencies:
   image_cropper: ^12.2.1
   crop_your_image: ^2.0.0
   path_provider: ^2.1.6
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +61,15 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/App Icon.jpg"
+  addaptive_icon_foreground: "assets/icon/foreground.jpg"
+  addaptive_icon_background: "assets/icon/background.jpg"
+
+  # image_path_android: "assets/icon/App Icon.jpg"
+  # image_path_ios: "assets/icon/App Icon.jpg"
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
