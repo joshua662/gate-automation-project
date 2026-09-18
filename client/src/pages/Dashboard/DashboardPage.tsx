@@ -346,11 +346,13 @@ const DashboardPage = () => {
             </div>
 
             {/* ── Vehicle Traffic Monitor ── */}
-            <VehicleTrafficMonitor
-                filter={vtmFilter}
-                onFilterChange={setVtmFilter}
-                carMonitor={data.car_monitor}
-            />
+            {user?.user?.role !== 'security_guard' && user?.user?.role !== 'guard' && (
+                <VehicleTrafficMonitor
+                    filter={vtmFilter}
+                    onFilterChange={setVtmFilter}
+                    carMonitor={data.car_monitor}
+                />
+            )}
 
             {/* ── Analytics Grid ── */}
             <div className="grid gap-6 lg:grid-cols-2 w-full min-w-0 overflow-hidden">
